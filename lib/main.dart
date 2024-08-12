@@ -1,6 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'pages/start.dart';
 
-void main() {
+void main() async {
+	// 1. Need this so we can initialise Firebase in the main function
+  WidgetsFlutterBinding.ensureInitialized(); 
+  
+  // 2. Intialise Firebase
+  await Firebase.initializeApp(
+	  options: DefaultFirebaseOptions.currentPlatform // Only incluce this if you have the firebase_options.dart file
+  );
+  
   runApp(const MyApp());
 }
 
@@ -10,28 +22,33 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    // Add this line to the top of the build function 
+	  Stream<User?> authStream = FirebaseAuth.instance.authStateChanges();
+
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'DoorBell',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
+        fontFamily: 'Helvetica Neue',
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: StreamBuilder<User?>(
+        stream: authStream,
+        initialData: null,
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          if (snapshot.data == null) {
+            return StartPage();
+          }
+          return MyHomePage(title: 'Test');
+        },
+      ),
+      
     );
   }
 }
