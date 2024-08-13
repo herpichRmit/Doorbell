@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 class SplashSmallText extends StatelessWidget {
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
+  final String text;
+  final bool backOption;
 
   const SplashSmallText({
     Key? key,
-    required this.onPressed,
+    this.onPressed = null,
+    this.text = 'Not what your looking for?',
+    this.backOption = true,
   }) : super(key: key);
 
   @override
@@ -16,24 +20,33 @@ class SplashSmallText extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const SizedBox(height: 24),
-        const Text('Not what your looking for? ', style: TextStyle(color: CupertinoColors.systemGrey, fontSize: 12.0, fontWeight: FontWeight.normal, letterSpacing: 0.0)),
-        TextButton(
-          onPressed: onPressed, 
-          style: TextButton.styleFrom(
-            padding: EdgeInsets.zero,
-            minimumSize: Size(0, 0),
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            alignment: Alignment.centerLeft
-          ),
-          child: const Text(
-            'Back', 
-            style: TextStyle(
-              fontSize: 12.0, 
-              fontWeight: FontWeight.w500, 
-              color: CupertinoColors.systemGrey,
-              letterSpacing: 0.0)),
-        )
+        Text(text + ' ', style: const TextStyle(color: CupertinoColors.systemGrey, fontSize: 12.0, fontWeight: FontWeight.normal, letterSpacing: 0.0)),
+        getWidget()
       ]
     );
   }
+
+  Widget getWidget() {
+    if (backOption) {
+      return TextButton(
+        onPressed: onPressed,
+        style: TextButton.styleFrom(
+          padding: EdgeInsets.zero,
+          minimumSize: Size(0, 0),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          alignment: Alignment.centerLeft
+        ),
+        child: const Text(
+          'Back', 
+          style: TextStyle(
+            fontSize: 12.0, 
+            fontWeight: FontWeight.w500, 
+            color: CupertinoColors.systemGrey,
+            letterSpacing: 0.0)),
+      );
+    } else {
+      return SizedBox();
+    }
+  }
+
 }

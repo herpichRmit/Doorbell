@@ -6,6 +6,7 @@ import '../components/button.dart'; // Import your custom button component
 import 'package:flutter/cupertino.dart';
 import '../components/splashSmallText.dart';
 import '../components/textField.dart';
+import 'startNeighbourhood.dart';
 
 
 class StartPage extends StatefulWidget {
@@ -86,8 +87,6 @@ class _StartPageState extends State<StartPage> {
               });
             },
           ),
-          const SizedBox(height: 16),
-          const SizedBox(width: double.infinity, height: 0.5, child: DecoratedBox(decoration: BoxDecoration( color: Colors.grey))),
         ],
       );
     }
@@ -112,16 +111,17 @@ class _StartPageState extends State<StartPage> {
                 text: 'Sign Up',
                 onPressed: () async {
                   
-                  signup(emailController.text, passwordController.text); // need to get result from todo form validation
+                  //signup(emailController.text, passwordController.text); // need to get result from todo form validation
 
-                  setState(() {
-                    _showWidgets = 3;
-                  });
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => StartNeighbourhoodPage())
+                  );
                 },
               ),
               const SizedBox(height: 16),
               const SizedBox(width: double.infinity, height: 0.5, child: DecoratedBox(decoration: BoxDecoration( color: Colors.grey))),
               SplashSmallText(
+                text: 'Already have an account?',
                 onPressed: () {
                   setState(() {
                     _showWidgets = 1;
@@ -159,6 +159,7 @@ class _StartPageState extends State<StartPage> {
           const SizedBox(height: 16),
           const SizedBox(width: double.infinity, height: 0.5, child: DecoratedBox(decoration: BoxDecoration( color: Colors.grey))),
           SplashSmallText(
+            text: 'Need to make an account?',
             onPressed: () {
               setState(() {
                 _showWidgets = 1;
@@ -181,6 +182,7 @@ class _StartPageState extends State<StartPage> {
             const SizedBox(height: 16),
             const SizedBox(width: double.infinity, height: 0.5, child: DecoratedBox(decoration: BoxDecoration( color: Colors.grey))),
             SplashSmallText(
+              text: 'Made a mistake?',
               onPressed: () {
                 setState(() {
                   _nextLogin = false;
