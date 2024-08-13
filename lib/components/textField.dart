@@ -5,12 +5,14 @@ class CustomTextField extends StatefulWidget {
   final TextEditingController controller;
   final String placeholder;
   final bool isPassword;
+  final bool isError;
 
   const CustomTextField({
     Key? key,
     required this.controller,
     this.placeholder = 'Enter your text...',
     this.isPassword = false,
+    this.isError = false,
   }) : super(key: key);
 
   @override
@@ -40,9 +42,11 @@ class _CustomTextFieldState extends State<CustomTextField> {
                 color: CupertinoColors.transparent,
                 borderRadius: BorderRadius.circular(5.5),
                 border: Border.all(
-                  color: _isFocused 
-                      ? CupertinoColors.systemBlue.withOpacity(0.5) 
-                      : CupertinoColors.transparent,
+                  color: widget.isError 
+                      ? CupertinoColors.destructiveRed.withOpacity(0.5) 
+                      : _isFocused 
+                        ? CupertinoColors.systemBlue.withOpacity(0.5) 
+                        : CupertinoColors.transparent,
                   width: 4,
                 ),
               ),

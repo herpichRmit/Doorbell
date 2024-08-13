@@ -1,4 +1,5 @@
 import 'dart:ffi';
+import 'package:doorbell/pages/start.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../components/button.dart';
@@ -34,14 +35,17 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(width: 44, height: 44, child: DecoratedBox(decoration: BoxDecoration( color: Colors.red),)), // ICON
               const SizedBox(height: 24),
               const Text('Stay Connected', style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600, letterSpacing: -0.26)),
-              const Text('Find your family\'s Neighbourhood', style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600, letterSpacing: -0.26, height: 1.2, color: CupertinoColors.systemGrey)),
               const SizedBox(height: 24),
-              const SizedBox( // Image
-                width: double.infinity,
-                height: 200,
-                child: DecoratedBox(decoration: BoxDecoration( color: Colors.red))
-              ),
               const SizedBox(height: 32),
+              Button(
+                text: 'restart',
+                onPressed: () {
+                  
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => StartPage())
+                  );
+                },
+              ),
               const Spacer(flex: 3),
               
             ],

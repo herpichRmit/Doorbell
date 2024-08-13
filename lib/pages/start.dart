@@ -1,5 +1,6 @@
 import 'dart:ffi';
 
+import 'package:doorbell/pages/home.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../components/button.dart'; // Import your custom button component
@@ -19,14 +20,22 @@ class StartPage extends StatefulWidget {
 
 class _StartPageState extends State<StartPage> {
   
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController passwordConfirmController = TextEditingController();
+  // Login textfield controllers
+  final TextEditingController loginEmailController = TextEditingController();
+  final TextEditingController loginPasswordController = TextEditingController();
+
+  // Signup textfield controllers
+  final TextEditingController signupEmailController = TextEditingController();
+  final TextEditingController signupPasswordController = TextEditingController();
+  final TextEditingController signupPasswordConfirmController = TextEditingController();
   
   final _formKey = GlobalKey<FormState>();
 
   int _showWidgets = 1;
   bool _nextLogin = false;
+  String _error = "";
+  String _email = "";
+  bool _isLoading = false;
 
   // username
   // password
@@ -101,33 +110,53 @@ class _StartPageState extends State<StartPage> {
         key: _formKey,
         child: Column(
             children: [
-              CustomTextField(placeholder: 'Enter your email address', controller: emailController),
+              CustomTextField(placeholder: 'Enter your email address', controller: signupEmailController, isError: (_error != "")),
               const SizedBox(height: 8),
-              CustomTextField(placeholder: 'Enter your password', controller: passwordController, isPassword: true),
+              CustomTextField(placeholder: 'Enter your password', controller: signupPasswordController, isPassword: true, isError: (_error != "")),
               const SizedBox(height: 8),
-              CustomTextField(placeholder: 'Confirm your password', controller: passwordConfirmController, isPassword: true),
+              CustomTextField(placeholder: 'Confirm your password', controller: signupPasswordConfirmController, isPassword: true, isError: (_error != "")),
               const SizedBox(height: 8),
               Button(
                 text: 'Sign Up',
+                isLoading: _isLoading,
                 onPressed: () async {
-                  
-                  //signup(emailController.text, passwordController.text); // need to get result from todo form validation
+                  activateLoading();
 
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => StartNeighbourhoodPage())
-                  );
+                  // is email address empty
+                  if (signupEmailController.text.isEmpty) {
+                    showError("Email address cannot be empty.");
+                    deActivateLoading();
+                  // is email a valid format
+                  } else if (!isValidEmail(signupEmailController.text)) {
+                    showError("That email doesn't look quite right, please try again.");
+                    deActivateLoading();
+                  // check passwords are not empty
+                  } else if ( (signupPasswordController.text == "") | (signupPasswordConfirmController.text == "") ) {
+                    showError('Password field is empty.');
+                    deActivateLoading();
+                  // check if passwords match
+                  } else if (signupPasswordController.text != signupPasswordConfirmController.text) {
+                    showError('Passwords do not match.');
+                    deActivateLoading();
+                  }
+                  else {
+                    bool result = await signup(signupEmailController.text, signupPasswordController.text);
+                    deActivateLoading();
+
+                    if (result == true) {
+                      clearControllers();
+                      clearError();
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => StartNeighbourhoodPage())
+                      );
+                    } 
+                  }
+                  
                 },
               ),
               const SizedBox(height: 16),
               const SizedBox(width: double.infinity, height: 0.5, child: DecoratedBox(decoration: BoxDecoration( color: Colors.grey))),
-              SplashSmallText(
-                text: 'Already have an account?',
-                onPressed: () {
-                  setState(() {
-                    _showWidgets = 1;
-                  });
-                }
-              ),
+              getSmallText(message: 'Already have an account?', widgetNumber: 1)
             ],
           )
       );
@@ -144,46 +173,88 @@ class _StartPageState extends State<StartPage> {
     if (_nextLogin == false) {
       return Column(
         children: [
-          CustomTextField(placeholder: 'Enter your email address...', controller: emailController),
+          CustomTextField(placeholder: 'Enter your email address...', controller: loginEmailController, isError: (_error != ""),),
           const SizedBox(height: 8),
           Button(
             text: 'Next',
+            isLoading: _isLoading,
             onPressed: () async {
+              activateLoading();
               
-              // If so:
-              setState(() {
-                _nextLogin = true;
-              });
+              // is email address empty
+              if (loginEmailController.text.isEmpty) {
+                showError("Email address cannot be empty.");
+                deActivateLoading();
+              // is email a valid format
+              } else if (!isValidEmail(loginEmailController.text)) {
+                showError("That doesn't look quite right, please try again.");
+                deActivateLoading();
+              // if not, save email to a temp variable, clear the controller and go to next screen
+              } else {
+                //bool result = await checkUserExists(loginEmailController.text); TODO: add this function
+                deActivateLoading();
+                //if (result == true) {
+                  _email = loginEmailController.text;
+                  clearControllers();
+                  clearError();
+                  setState(() {
+                    _nextLogin = true;
+                  });
+                //}
+              }
             },
           ),
           const SizedBox(height: 16),
           const SizedBox(width: double.infinity, height: 0.5, child: DecoratedBox(decoration: BoxDecoration( color: Colors.grey))),
-          SplashSmallText(
-            text: 'Need to make an account?',
-            onPressed: () {
-              setState(() {
-                _showWidgets = 1;
-              });
-            }
-          ),
+          getSmallText(message: 'Need to make an account?', widgetNumber: 1)
         ],
       );
     } else if (_nextLogin == true) {
       return Column(
           children: [
-            CustomTextField(placeholder: 'Enter your password...', controller: passwordController, isPassword: true),
+            CustomTextField(placeholder: 'Enter your password...', controller: loginPasswordController, isPassword: true, isError: (_error != "")),
             const SizedBox(height: 8),
+            
             Button(
               text: 'Login',
+              isLoading: _isLoading,
               onPressed: () async {
-                    login(emailController.text, passwordController.text);
-                  },
+                activateLoading();
+
+                // is password is empty
+                if (loginPasswordController.text.isEmpty) {
+                  showError("Password cannot be empty.");
+                  deActivateLoading();
+                // if not, try to login user
+                } else {
+                  bool result = await login(_email, loginPasswordController.text);
+                  deActivateLoading();
+                  
+                  if (result == true) {
+                    clearControllers();
+                    clearError();
+                    // If login is successful, navigate to the next page
+                    // TODO: do checks here on user to make sure user has neighbourhood and house already
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => StartNeighbourhoodPage()),
+                    );
+                  }
+                }
+                },
             ),
             const SizedBox(height: 16),
             const SizedBox(width: double.infinity, height: 0.5, child: DecoratedBox(decoration: BoxDecoration( color: Colors.grey))),
+            if (_error != "") // Error message
+              SplashSmallText(
+                text: _error,
+                backOption: false,
+                isError: true,
+              ),
             SplashSmallText(
               text: 'Made a mistake?',
               onPressed: () {
+                clearControllers();
+                clearError();
                 setState(() {
                   _nextLogin = false;
                 });
@@ -196,58 +267,140 @@ class _StartPageState extends State<StartPage> {
     }
   }
 
-  // This function calls FirebaseAuth to authenticate the user
-  login(email, password) async {
-    try {
-      final credential = await FirebaseAuth.instance
-      .signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        print('No user found for that email.'); // add bad cases
-      } else if (e.code == 'wrong-password') {
-        print('Wrong password provided for that user.'); // add bad cases ALSO add loading state
-      }
-    } catch (e) {
-      print(e);
-    }
+  void showError(String message) {
+    // Show an error message to the user
+    setState(() {
+      _error = message;
+    });
   }
 
-  // This function calls FirebaseAuth to create a new user
-  signup(email, password) async {
-    try {
-      final credential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-    } on FirebaseAuthException catch (e) {
-      print(e);
-      if (e.code == 'weak-password') {
-        print('The password provided is too weak.');
-      } else if (e.code == 'email-already-in-use') {
-        print('The account already exists for that email.');
-      }
-    } catch (e) {
-      print(e);
-    }
-
+  void clearError() {
+    setState(() {
+      _error = "";
+    });
   }
 
-  /*
-  doesUserExist(currentUserName) async {
+  void clearControllers() {
+    loginEmailController.text = "";
+    loginPasswordController.text = "";
+    signupEmailController.text = "";
+    signupPasswordController.text = "";
+    signupPasswordConfirmController.text = "";
+  }
+
+  void activateLoading(){
+    setState(() { 
+      _isLoading = true;
+    });
+  }
+
+  void deActivateLoading(){
+    setState(() { 
+      _isLoading = false;
+    });
+  }
+
+  bool isValidEmail(String email) {
+    final RegExp emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+    return emailRegex.hasMatch(email);
+  }
+
+  checkUserExists(String email) async { // TODO: Pending integration with FirebaseFirestore
+    /*
     try {
     // if the size of value is greater then 0 then that doc exist. 
       await FirebaseFirestore.instance
           .collection('Users')
-          .where('email', isEqualTo: currentEmail)
+          .where('email', isEqualTo: email)
           .get()
           .then((value) => value.size > 0 ? true : false);
     } catch (e) {
       debugPrint(e.toString());
      
     }
-  }*/
+  */
+
+  }
+
+  // This function calls FirebaseAuth to authenticate the user
+  login(String email, String password) async {
+    try {
+      final credential = await FirebaseAuth.instance
+      .signInWithEmailAndPassword(
+        email: email, 
+        password: password
+      );
+      return true;
+
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        showError('No user found for that email.');
+        return false;
+      } else if (e.code == 'wrong-password') {
+        showError('Wrong password provided.');
+        return false;
+      } 
+      showError('An error occurred. Please try again.');
+      return false;
+    } catch (e) {
+      showError('An error occurred. Please try again.');
+      return false;
+    }
+  }
+
+
+  // This function calls FirebaseAuth to create a new user
+  signup(String email, String password) async {
+    try {
+      final credential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
+      return true;
+
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'weak-password') {
+        showError('The password provided is too weak.');
+        return false;
+      } else if (e.code == 'email-already-in-use') {
+        showError('The account already exists for that email.');
+        return false;
+      }
+      showError('An error occurred. Please try again.');
+      return false;
+    } catch (e) {
+      showError('An error occurred. Please try again.');
+      return false;
+    }
+  }
+
+  Widget getSmallText({required String message, int widgetNumber = 0}) {
+    return Column(
+      children: [
+        if (_error != "") // Error message
+          SplashSmallText(
+            text: _error,
+            backOption: false,
+            isError: true,
+          ),
+        if (widgetNumber != 0)
+          SplashSmallText( // Text at the bottom
+            text: message,
+            onPressed: () {
+              clearControllers();
+              clearError();
+              setState(() {
+                _showWidgets = widgetNumber;
+              });
+            }
+          )
+          else if (widgetNumber == 0)
+            SplashSmallText( // Text at the bottom
+              text: message,
+              backOption: false,
+            )
+      ],
+    );
+  }
+    
+
 }
+

@@ -10,7 +10,9 @@ import '../components/textField.dart';
 
 
 class StartAvatarPage extends StatefulWidget {
-  StartAvatarPage({super.key});
+  final int inputScreen;
+  
+  StartAvatarPage({Key? key, this.inputScreen = 2}) : super(key: key);
 
   @override
   _StartAvatarPageState createState() => _StartAvatarPageState();
@@ -18,18 +20,19 @@ class StartAvatarPage extends StatefulWidget {
 }
 
 class _StartAvatarPageState extends State<StartAvatarPage> {
-  
-  // Join screens
   final TextEditingController nameController = TextEditingController();
+  late int _screen;
+
+  void initState() {
+    super.initState();
+    _screen = widget.inputScreen;
+  }
   
-  final _formKey = GlobalKey<FormState>();
-
-  int _screen = 1;
-  bool _nextLogin = false;
-
   int _currentAvatarIndex = 0;
-  Color _selectedColor = Colors.orange;
+  Color _selectedColor = CupertinoColors.systemGrey;
   String _selectedHouse = "";
+  String _error = "";
+  bool _isLoading = false;
 
   void _selectHouse(String house) {
     setState(() {
@@ -38,9 +41,9 @@ class _StartAvatarPageState extends State<StartAvatarPage> {
   }
 
   final List<Image> _avatars = [
-    Image.asset('assets/avatar1.png'),
-    Image.asset('assets/avatar2.png'),
-    Image.asset('assets/avatar3.png'),
+    Image.asset('assets/images/avatar-test1.svg'),
+    //Image.asset('assets/avatar2.png'),
+    //Image.asset('assets/avatar3.png'),
   ];
 
   final List<String> _houses = [
@@ -118,9 +121,92 @@ class _StartAvatarPageState extends State<StartAvatarPage> {
 
   Widget getPageFunctionality() {
 
-    // Page 1
+    // Do you live with anyone already connected, screen (doesn't appear for people who are hosting)
 
     if (_screen == 1) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          const Center(
+            child: Text('Do you live with any of these people?', style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w600, letterSpacing: -0.45, height: 1.2, color: Colors.black)),
+          ),
+          const SizedBox(height: 32),
+
+          Container(
+            height: 286,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: _houses.map((house) {
+                bool isSelected = _selectedHouse == house;
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: GestureDetector(
+                    onTap: () => _selectHouse(house),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(5.5),
+                        border: Border.all(
+                          color: Colors.grey, // Original inner border
+                          width: 1,
+                        ),
+                        boxShadow: [
+                          if (isSelected)
+                            BoxShadow(
+                              color: Colors.blue.withOpacity(0.8), // Outer border color
+                              spreadRadius: 2, 
+                              blurRadius: 0.2,
+                            ),
+                        ],
+                      ),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 36,
+                        child: Center(
+                          child: Text(
+                            house,
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+
+          const SizedBox(height: 32),
+          Button(
+            text: 'Next',
+            isLoading: _isLoading,
+            onPressed: () async {
+            
+              if (_selectedHouse == "") {
+                showError('Please select one of the options above.');
+              } else {
+                setState(() {
+                  _screen = 2;
+                });
+              }
+
+              
+            },
+          ),
+          const SizedBox(height: 16),
+          const SizedBox(width: double.infinity, height: 0.5, child: DecoratedBox(decoration: BoxDecoration( color: Colors.grey))),
+          getSmallText(message: 'So we can find out which house you belong in.')
+        ],
+      );
+
+    // Name screen
+
+    } else if (_screen == 2) {
       return Column(
         children: [
           const Center(
@@ -133,31 +219,36 @@ class _StartAvatarPageState extends State<StartAvatarPage> {
             child: DecoratedBox(decoration: BoxDecoration( color: Colors.orange))
           ),
           const SizedBox(height: 32),
-          CustomTextField(placeholder: 'Enter name...', controller: nameController),
+          CustomTextField(placeholder: 'Enter name...', controller: nameController, isError: checkError(),),
           const SizedBox(height: 8),
           Button(
             text: 'Next',
             onPressed: () async {
             
-              // functionality
+              // is password empty
+              if (nameController.text.isEmpty) {
+                showError("Name cannot be empty.");
+              // if not, try to login to neighbourhood
+              } else {
+                clearControllers();
+                clearError();
+                setState(() {
+                  _screen = 3;
+                });
+              }
 
-              setState(() {
-                _screen = 2;
-              });
+              
             },
           ),
           const SizedBox(height: 16),
           const SizedBox(width: double.infinity, height: 0.5, child: DecoratedBox(decoration: BoxDecoration( color: Colors.grey))),
-          SplashSmallText(
-            text: 'This will be so other users can identify you.',
-            backOption: false,
-          ),
+          getSmallText(message: 'This will be so other users can identify you.', widgetNumber: 0)
         ],
       );
 
-    // Page 2
+    // Avatar picker screen
 
-    } else if (_screen == 2) {
+    } else if (_screen == 3) {
       return Column(
         children: [
           const Center(
@@ -235,100 +326,25 @@ class _StartAvatarPageState extends State<StartAvatarPage> {
           Button(
             text: 'Next',
             onPressed: () async {
-              setState(() {
-                _screen = 3;
-              });
+
+              if (_selectedColor == CupertinoColors.systemGrey) {
+                showError('Please select a colour.');
+              } else {
+                clearError(); // TODO: big save here
+                setState(() {
+                  _screen = 4;
+                });
+              }
             },
           ),
           const SizedBox(height: 16),
           const SizedBox(width: double.infinity, height: 0.5, child: DecoratedBox(decoration: BoxDecoration( color: Colors.grey))),
-          const SplashSmallText(
-            text: 'This is your avatar, it represents you in the app.',
-            backOption: false,
-          ),
+          getSmallText(message: 'This is your avatar, it represents you in the app.')
         ],
       );
 
-    // Page 3
+    // Confirmation screen
 
-    } else if (_screen == 3) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          const Center(
-            child: Text('Do you live with any of these people?', style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w600, letterSpacing: -0.45, height: 1.2, color: Colors.black)),
-          ),
-          const SizedBox(height: 32),
-
-          Container(
-            height: 286,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: _houses.map((house) {
-                bool isSelected = _selectedHouse == house;
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: GestureDetector(
-                    onTap: () => _selectHouse(house),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(5.5),
-                        border: Border.all(
-                          color: Colors.grey, // Original inner border
-                          width: 1,
-                        ),
-                        boxShadow: [
-                          if (isSelected)
-                            BoxShadow(
-                              color: Colors.blue.withOpacity(0.8), // Outer border color
-                              spreadRadius: 2, 
-                              blurRadius: 0.2,
-                            ),
-                        ],
-                      ),
-                      child: SizedBox(
-                        width: double.infinity,
-                        height: 36,
-                        child: Center(
-                          child: Text(
-                            house,
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-
-          const SizedBox(height: 32),
-          Button(
-            text: 'Next',
-            onPressed: () async {
-            
-              // functionality
-
-              setState(() {
-                _screen = 4;
-              });
-            },
-          ),
-          const SizedBox(height: 16),
-          const SizedBox(width: double.infinity, height: 0.5, child: DecoratedBox(decoration: BoxDecoration( color: Colors.grey))),
-          SplashSmallText(
-            text: 'This will be so other users can identify you.',
-            backOption: false,
-          ),
-        ],
-      );
     } else if (_screen == 4) {
       return Column(
         children: [
@@ -382,6 +398,71 @@ class _StartAvatarPageState extends State<StartAvatarPage> {
       );
     }
     
+  }
+  void showError(String message) {
+    // Show an error message to the user
+    setState(() {
+      _error = message;
+    });
+  }
+
+  void clearError() {
+    setState(() {
+      _error = "";
+    });
+  }
+
+  void activateLoading(){
+    setState(() { 
+      _isLoading = true;
+    });
+  }
+
+  void deActivateLoading(){
+    setState(() { 
+      _isLoading = false;
+    });
+  }
+
+  bool checkError(){
+    if (_error == "") {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  void clearControllers() {
+    nameController.text = "";
+  }
+
+  Widget getSmallText({required String message, int widgetNumber = 0}) {
+    return Column(
+      children: [
+        if (_error != "") // Error message
+          SplashSmallText(
+            text: _error,
+            backOption: false,
+            isError: true,
+          ),
+        if (widgetNumber != 0)
+          SplashSmallText( // Text at the bottom
+            text: message,
+            onPressed: () {
+              clearControllers();
+              clearError();
+              setState(() {
+                _screen = widgetNumber;
+              });
+            }
+          )
+          else if (widgetNumber == 0)
+            SplashSmallText( // Text at the bottom
+              text: message,
+              backOption: false,
+            )
+      ],
+    );
   }
 
 }

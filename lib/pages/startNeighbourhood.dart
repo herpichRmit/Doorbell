@@ -29,9 +29,11 @@ class _StartNeighbourhoodState extends State<StartNeighbourhoodPage> {
   final TextEditingController hostNeighPasswordConfirmController = TextEditingController();
   
   final _formKey = GlobalKey<FormState>();
+  String _error = "";
 
   int _showWidgets = 1;
   bool _nextLogin = false;
+  bool _isLoading = false;
 
 
   @override
@@ -121,36 +123,45 @@ class _StartNeighbourhoodState extends State<StartNeighbourhoodPage> {
         key: _formKey,
         child: Column(
             children: [
-              CustomTextField(placeholder: 'Enter neighbourhood password', controller: hostNeighPasswordController),
+              CustomTextField(placeholder: 'Enter neighbourhood password', controller: hostNeighPasswordController, isPassword: true, isError: checkError(),),
               const SizedBox(height: 8),
-              CustomTextField(placeholder: 'Confirm neighbourhood password', controller: hostNeighPasswordConfirmController),
+              CustomTextField(placeholder: 'Confirm neighbourhood password', controller: hostNeighPasswordConfirmController, isPassword: true, isError: checkError(),),
               const SizedBox(height: 8),
               Button(
                 text: 'Create',
+                isLoading: _isLoading,
                 onPressed: () async {
-                  
+                  activateLoading();
+                  // check passwords are not empty
+                  if ( (hostNeighPasswordController.text == "") | (hostNeighPasswordConfirmController.text == "") ) {
+                    showError('Password field is empty.');
+                    deActivateLoading();
                   // check if passwords match
+                  } else if (hostNeighPasswordController.text != hostNeighPasswordConfirmController.text) {
+                    showError('Passwords do not match.');
+                    deActivateLoading();
+                  } else if (!isValidPassword(hostNeighPasswordController.text)) {
+                    showError('Password is too weak.');
+                    deActivateLoading();
+                  } else { // TODO: function to create passwords after firestore integration
+                    //bool result = await signup(signupEmailController.text, signupPasswordController.text);
+                    deActivateLoading();
 
-                  // run somesort of create neighbourhood function
+                    // TODO: get neighbourhood id back from firestore and save for next screen
 
-                  // have a loading state
-
-                  // if success then
-                  setState(() {
-                    _showWidgets = 3;
-                  });
+                    //if (result == true) {
+                      clearControllers();
+                      clearError();
+                      setState(() {
+                        _showWidgets = 3;
+                      });
+                    //} 
+                  }
                 },
               ),
               const SizedBox(height: 16),
               const SizedBox(width: double.infinity, height: 0.5, child: DecoratedBox(decoration: BoxDecoration( color: Colors.grey))),
-              SplashSmallText(
-                text: 'Host a neighbourhood for your friends and family to join.',
-                onPressed: () {
-                  setState(() {
-                    _showWidgets = 1;
-                  });
-                }
-              ),
+              getSmallText(message: 'Host a neighbourhood for your friends and family to join.', widgetNumber: 1)
             ],
           )
       );
@@ -168,7 +179,7 @@ class _StartNeighbourhoodState extends State<StartNeighbourhoodPage> {
             onPressed: () async {
 
               Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => StartNeighbourhoodPage())
+                MaterialPageRoute(builder: (context) => StartAvatarPage())
               );
             },
           ),
@@ -186,29 +197,39 @@ class _StartNeighbourhoodState extends State<StartNeighbourhoodPage> {
         key: _formKey,
         child: Column(
             children: [
-              CustomTextField(placeholder: 'Enter neighbourhood ID...', controller: joinNeighIDController),
+              CustomTextField(placeholder: 'Enter neighbourhood ID...', controller: joinNeighIDController, isError: checkError()),
               const SizedBox(height: 8),
               Button(
                 text: 'Next',
+                isLoading: _isLoading,
                 onPressed: () async {
-                  
-                  // check if neighbourhood id exists
+                  activateLoading();
 
-                  setState(() {
-                    _showWidgets = 5;
-                  });
+                  // check if id is empty
+                  if (joinNeighIDController.text.isEmpty){
+                    showError('ID cannot be empty.');
+                    deActivateLoading();
+                  
+                  // TODO: async function call to check if neighbourhood exists
+                  } else {
+                    //bool result = await func()
+
+                    //if (result == true){
+                      deActivateLoading();
+                      clearControllers();
+                      clearError();
+
+                      setState(() {
+                        _showWidgets = 5;
+                      });
+                    //}
+                  }
+                  
                 },
               ),
               const SizedBox(height: 16),
               const SizedBox(width: double.infinity, height: 0.5, child: DecoratedBox(decoration: BoxDecoration( color: Colors.grey))),
-              SplashSmallText(
-                text: 'Join a neighbourhood hosted by friends or family.',
-                onPressed: () {
-                  setState(() {
-                    _showWidgets = 1;
-                  });
-                }
-              ),
+              getSmallText(message: 'Join a neighbourhood hosted by friends or family.', widgetNumber: 1)
             ],
           )
       );
@@ -218,26 +239,39 @@ class _StartNeighbourhoodState extends State<StartNeighbourhoodPage> {
         key: _formKey,
         child: Column(
             children: [
-              CustomTextField(placeholder: 'Enter neighbourhood password...', controller: joinNeighPasswordController, isPassword: true),
+              CustomTextField(placeholder: 'Enter neighbourhood password...', controller: joinNeighPasswordController, isPassword: true, isError: checkError()),
               const SizedBox(height: 8),
               Button(
+                
                 text: 'Join',
+                isLoading: _isLoading,
                 onPressed: () {
-                  setState(() {
-                    _showWidgets = 6;
-                  });
+                  activateLoading();
+
+                  // is password empty
+                  if (joinNeighPasswordController.text.isEmpty) {
+                    showError("Password cannot be empty.");
+                    deActivateLoading();
+                  // if not, try to login to neighbourhood
+                  } else {
+                    //bool result = await authNeighbourhood(_email, loginPasswordController.text);
+                    deActivateLoading();
+                    
+                    //if (result == true) {
+                      clearControllers();
+                      clearError();
+                      // If login is successful, navigate to the next page
+                      // TODO: do checks here on user to make sure user has neighbourhood and house already
+                      setState(() {
+                        _showWidgets = 6;
+                      });
+                    //}
+                  }
                 }
               ),
               const SizedBox(height: 16),
               const SizedBox(width: double.infinity, height: 0.5, child: DecoratedBox(decoration: BoxDecoration( color: Colors.grey))),
-              SplashSmallText(
-                text: 'The person who hosted set the password.',
-                onPressed: () {
-                  setState(() {
-                    _showWidgets = 4;
-                  });
-                }
-              ),
+              getSmallText(message: 'The person who hosted set the password.', widgetNumber: 4)
             ],
           )
       );
@@ -253,7 +287,7 @@ class _StartNeighbourhoodState extends State<StartNeighbourhoodPage> {
             onPressed: () async {
 
               Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => StartAvatarPage())
+                MaterialPageRoute(builder: (context) => StartAvatarPage(inputScreen: 1))
               );
             },
           ),
@@ -269,5 +303,82 @@ class _StartNeighbourhoodState extends State<StartNeighbourhoodPage> {
       return const SizedBox(height: 16);
     }
   }
+  void showError(String message) {
+    // Show an error message to the user
+    setState(() {
+      _error = message;
+    });
+  }
 
+  void clearError() {
+    setState(() {
+      _error = "";
+    });
+  }
+
+  void activateLoading(){
+    setState(() { 
+      _isLoading = true;
+    });
+  }
+
+  void deActivateLoading(){
+    setState(() { 
+      _isLoading = false;
+    });
+  }
+
+  bool checkError(){
+    if (_error == "") {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  bool isValidPassword(String password) {
+    // Define the regex pattern for a strong password
+    final RegExp passwordRegex = RegExp(
+      r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$'
+    );
+
+    // Test the password against the regex pattern
+    return passwordRegex.hasMatch(password);
+  }
+
+  void clearControllers() {
+    joinNeighIDController.text = "";
+    joinNeighPasswordController.text = "";
+    hostNeighPasswordConfirmController.text = "";
+    hostNeighPasswordConfirmController.text = "";
+  }
+
+  Widget getSmallText({required String message, int widgetNumber = 0}) {
+    return Column(
+      children: [
+        if (_error != "") // Error message
+          SplashSmallText(
+            text: _error,
+            backOption: false,
+            isError: true,
+          ),
+        if (widgetNumber != 0)
+          SplashSmallText( // Text at the bottom
+            text: message,
+            onPressed: () {
+              clearControllers();
+              clearError();
+              setState(() {
+                _showWidgets = widgetNumber;
+              });
+            }
+          )
+          else if (widgetNumber == 0)
+            SplashSmallText( // Text at the bottom
+              text: message,
+              backOption: false,
+            )
+      ],
+    );
+  }
 }

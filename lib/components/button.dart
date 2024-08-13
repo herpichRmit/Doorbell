@@ -4,11 +4,13 @@ import 'package:flutter/cupertino.dart';
 class Button extends StatefulWidget {
   final String text;
   final VoidCallback onPressed;
+  final bool isLoading;
 
   const Button({
     Key? key,
     required this.text,
     required this.onPressed,
+    this.isLoading = false,
   }) : super(key: key);
 
   @override
@@ -53,17 +55,27 @@ class _ButtonState extends State<Button> {
           ),
           padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
           child: Center(
-            child: Text(
-              widget.text,
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
+            child: widget.isLoading 
+              ? const SizedBox(
+                  child: Center(
+                    child: CircularProgressIndicator(color: CupertinoColors.systemGrey2, strokeWidth: 2.5),
+                  ),
+                  width: 15,
+                  height: 15,
+                )
+              : Text(
+                widget.text, 
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 14, 
+                  fontWeight: 
+                  FontWeight.w600,
+                )
               ),
-            ),
           ),
         ),
       ),
     );
   }
 }
+            

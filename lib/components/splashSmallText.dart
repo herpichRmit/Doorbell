@@ -5,12 +5,14 @@ class SplashSmallText extends StatelessWidget {
   final VoidCallback? onPressed;
   final String text;
   final bool backOption;
+  final bool isError;
 
   const SplashSmallText({
     Key? key,
     this.onPressed = null,
     this.text = 'Not what your looking for?',
     this.backOption = true,
+    this.isError = false,
   }) : super(key: key);
 
   @override
@@ -20,7 +22,11 @@ class SplashSmallText extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const SizedBox(height: 24),
-        Text(text + ' ', style: const TextStyle(color: CupertinoColors.systemGrey, fontSize: 12.0, fontWeight: FontWeight.normal, letterSpacing: 0.0)),
+        Text(text + ' ', style: TextStyle(
+          color: isError ? CupertinoColors.destructiveRed :  CupertinoColors.systemGrey, 
+          fontSize: 12.0, 
+          fontWeight: FontWeight.normal, 
+          letterSpacing: 0.0)),
         getWidget()
       ]
     );
@@ -36,7 +42,7 @@ class SplashSmallText extends StatelessWidget {
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           alignment: Alignment.centerLeft
         ),
-        child: const Text(
+        child: Text(
           'Back', 
           style: TextStyle(
             fontSize: 12.0, 
