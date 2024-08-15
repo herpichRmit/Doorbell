@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 
 import 'package:doorbell/pages/start.dart';
 import 'package:doorbell/pages/debug.dart';
+import 'package:doorbell/pages/feed.dart';
 import 'startNeighbourhood.dart';
 
 import 'package:doorbell/pages/debug.dart';
@@ -62,7 +63,11 @@ class _HomePageState extends State<HomePage> {
               Row(
                 children: [
                   Spacer(),
-                  HouseButton(imagePath: 'assets/images/houses/house2.png', onPressed: () {  },),
+                  HouseButton(imagePath: 'assets/images/houses/house2.png', onPressed: () { 
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => FeedPage())
+                    );
+                   },),
                 ],
               ),
 
@@ -84,6 +89,7 @@ class _HomePageState extends State<HomePage> {
 
               const Spacer(flex: 3),
               
+              /*
               Button(
                 text: 'debug',
                 onPressed: () async {
@@ -92,7 +98,7 @@ class _HomePageState extends State<HomePage> {
                     MaterialPageRoute(builder: (context) => DebugPage())
                   );
                 },
-              ),
+              ),*/
             ],
           ),
         ),

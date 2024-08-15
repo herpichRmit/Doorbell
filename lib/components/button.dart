@@ -5,12 +5,14 @@ class Button extends StatefulWidget {
   final String text;
   final VoidCallback onPressed;
   final bool isLoading;
+  final Widget? icon; // Optional icon property
 
   const Button({
     Key? key,
     required this.text,
     required this.onPressed,
     this.isLoading = false,
+    this.icon, // Initialize icon property
   }) : super(key: key);
 
   @override
@@ -54,28 +56,39 @@ class _ButtonState extends State<Button> {
             ),
           ),
           padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
-          child: Center(
-            child: widget.isLoading 
-              ? const SizedBox(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (widget.isLoading)
+                const SizedBox(
                   child: Center(
                     child: CircularProgressIndicator(color: CupertinoColors.systemGrey2, strokeWidth: 2.5),
                   ),
                   width: 15,
                   height: 15,
                 )
-              : Text(
-                widget.text, 
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 14, 
-                  fontWeight: 
-                  FontWeight.w600,
-                )
-              ),
+              else
+                if (widget.icon != null) // Check if icon is provided
+                  Padding(
+                    padding: const EdgeInsets.only(right: 4.0), // Add spacing between text and icon
+                    child: SizedBox(
+                      height: 12,
+                      width: 12,
+                      child: widget.icon,
+                    ),
+                  ),
+                Text(
+                  widget.text, 
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 14, 
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+            ],
           ),
         ),
       ),
     );
   }
 }
-            

@@ -77,6 +77,16 @@ flutter:
     - assets/images/houses/house2.png
     - assets/images/houses/house3.png
     - assets/images/houses/house4.png
+    - assets/images/icons/Check.png
+    - assets/images/icons/Chevron-Left.png
+    - assets/images/icons/Chevron-right.png
+    - assets/images/icons/Close.png
+    - assets/images/icons/MenuVertical.png
+    - assets/images/icons/ph_image-fill.png
+    - assets/images/icons/Pulse.png
+    - assets/images/icons/plusfill.png
+    - assets/images/icons/tickfilled.png
+    - assets/images/icons/crossfill.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
