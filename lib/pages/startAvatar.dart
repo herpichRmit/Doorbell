@@ -7,6 +7,8 @@ import '../components/button.dart'; // Import your custom button component
 import 'package:flutter/cupertino.dart';
 import '../components/splashSmallText.dart';
 import '../components/textField.dart';
+//final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
 
 
 class StartAvatarPage extends StatefulWidget {
@@ -27,6 +29,7 @@ class _StartAvatarPageState extends State<StartAvatarPage> {
     super.initState();
     _screen = widget.inputScreen;
   }
+
   
   int _currentAvatarIndex = 0;
   Color _selectedColor = CupertinoColors.systemGrey;
@@ -435,6 +438,21 @@ class _StartAvatarPageState extends State<StartAvatarPage> {
   void clearControllers() {
     nameController.text = "";
   }
+
+  /*
+  Future<void> createUserProfile(String email, String name, String avatarRef, Color avatarCol, String houseId) async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      await _firestore.collection('users').doc(user.uid).set({
+        'email': email,
+        'name': name,
+        'avatarRef': avatarRef,
+        'avatarCol' : avatarCol,
+        'houseId' : houseId,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+    }
+  }*/
 
   Widget getSmallText({required String message, int widgetNumber = 0}) {
     return Column(

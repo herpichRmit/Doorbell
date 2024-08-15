@@ -1,12 +1,21 @@
 import 'dart:ffi';
-import 'package:doorbell/pages/start.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../components/button.dart';
 import 'package:flutter/cupertino.dart';
+
+import 'package:doorbell/pages/start.dart';
+import 'package:doorbell/pages/debug.dart';
+import 'startNeighbourhood.dart';
+
+import 'package:doorbell/pages/debug.dart';
 import '../components/splashSmallText.dart';
 import '../components/textField.dart';
-import 'startNeighbourhood.dart';
+import '../components/button.dart';
+import '../components/houseButton.dart';
+
+
+
+//import 'package:cloud_firestore/cloud_firestore.dart';
 
 
 class HomePage extends StatefulWidget {
@@ -18,6 +27,12 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+
+  // Define this stream before the build statement
+  //final Stream<QuerySnapshot> collectionStream = FirebaseFirestore.instance
+  //  .collection('posts') // Choose which collection we want to read
+  //  .orderBy("date", descending: true) // OPTIONAL: Set an order
+  //  .snapshots(); // Get notified of any changes to the collection
 
 
   @override
@@ -32,22 +47,52 @@ class _HomePageState extends State<HomePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(height: 40),
-              const SizedBox(width: 44, height: 44, child: DecoratedBox(decoration: BoxDecoration( color: Colors.red),)), // ICON
-              const SizedBox(height: 24),
-              const Text('Stay Connected', style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600, letterSpacing: -0.26)),
-              const SizedBox(height: 24),
-              const SizedBox(height: 32),
+              
+              Row(
+                children: [
+                  HouseButton(imagePath: 'assets/images/houses/house1.png', onPressed: () { 
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => DebugPage())
+                    );
+                   },),
+                  Spacer(),
+                ],
+              ),
+
+              Row(
+                children: [
+                  Spacer(),
+                  HouseButton(imagePath: 'assets/images/houses/house2.png', onPressed: () {  },),
+                ],
+              ),
+
+              Row(
+                children: [
+                  HouseButton(imagePath: 'assets/images/houses/house3.png', onPressed: () {  },),
+                  Spacer(),
+                ],
+              ),
+
+              Row(
+                children: [
+                  Spacer(),
+                  HouseButton(imagePath: 'assets/images/houses/house4.png', onPressed: () {  },),
+                ],
+              ),
+
+              
+
+              const Spacer(flex: 3),
+              
               Button(
-                text: 'restart',
-                onPressed: () {
-                  
+                text: 'debug',
+                onPressed: () async {
+
                   Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => StartPage())
+                    MaterialPageRoute(builder: (context) => DebugPage())
                   );
                 },
               ),
-              const Spacer(flex: 3),
-              
             ],
           ),
         ),

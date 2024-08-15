@@ -34,7 +34,7 @@ class _StartNeighbourhoodState extends State<StartNeighbourhoodPage> {
   int _showWidgets = 1;
   bool _nextLogin = false;
   bool _isLoading = false;
-
+  String _neighbourhoodId = "";
 
   @override
   Widget build(BuildContext context) {
@@ -146,6 +146,13 @@ class _StartNeighbourhoodState extends State<StartNeighbourhoodPage> {
                   } else { // TODO: function to create passwords after firestore integration
                     //bool result = await signup(signupEmailController.text, signupPasswordController.text);
                     deActivateLoading();
+
+                    // FUNCTION 1
+                    //check if neighbourhood ID + password exist
+                    
+                    // FUNCTION 2
+                    //var currentUser = FirebaseAuth.instance.currentUser;
+                    //create document in firestore with neighbourhood id
 
                     // TODO: get neighbourhood id back from firestore and save for next screen
 
