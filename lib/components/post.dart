@@ -19,7 +19,7 @@ class PostCard extends StatelessWidget {
           Positioned(
             left: 6,
             top: 16,
-            child: Image.asset(post.avatarUrl, height: 44),),
+            child: post.avatar), 
           Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -49,13 +49,13 @@ class PostCard extends StatelessWidget {
                           Container(
                             padding: EdgeInsets.symmetric(horizontal: 4.0),
                             decoration: BoxDecoration(
-                              color: CupertinoColors.systemBlue.withOpacity(0.2),
+                              color: post.avatar.color.withOpacity(0.2),
                               borderRadius: BorderRadius.circular(2),
                             ),
                             child: Text(
                               "New",
                               style: TextStyle(
-                                color: CupertinoColors.systemBlue.withOpacity(0.7), // TODO: read avatar.colour in here
+                                color: post.avatar.color.withOpacity(0.7),
                                 fontSize: 14.0,
                                 fontWeight: FontWeight.w500,
                                 letterSpacing: -0.4,

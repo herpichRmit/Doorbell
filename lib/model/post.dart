@@ -1,8 +1,10 @@
 //import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'package:doorbell/components/avatar.dart';
+
 class Post {
   final String id;
-  final String avatarUrl;
+  final Avatar avatar;
   final String title;
   final String description;
   final List<String> images;
@@ -11,7 +13,7 @@ class Post {
 
   Post({
     required this.id,
-    required this.avatarUrl,
+    required this.avatar,
     required this.title,
     required this.description,
     required this.images,

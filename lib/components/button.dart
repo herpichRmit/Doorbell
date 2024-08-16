@@ -59,7 +59,7 @@ class _ButtonState extends State<Button> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (widget.isLoading)
+              if (widget.isLoading) 
                 const SizedBox(
                   child: Center(
                     child: CircularProgressIndicator(color: CupertinoColors.systemGrey2, strokeWidth: 2.5),
@@ -77,14 +77,14 @@ class _ButtonState extends State<Button> {
                       child: widget.icon,
                     ),
                   ),
-                Text(
-                  widget.text, 
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 14, 
-                    fontWeight: FontWeight.w600,
+                  Text(
+                    widget.text, 
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 14, 
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
             ],
           ),
         ),

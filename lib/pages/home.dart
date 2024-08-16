@@ -45,7 +45,7 @@ class _HomePageState extends State<HomePage> {
         child: Padding(
           padding: const EdgeInsets.all(32), // 16 is apple HIGs standard, lets do 32 for onboarding screens.
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(height: 40),
@@ -64,7 +64,7 @@ class _HomePageState extends State<HomePage> {
               Row(
                 children: [
                   Spacer(),
-                  HouseButton(imagePath: 'assets/images/houses/house2.png', onPressed: () { 
+                  HouseButton(imagePath: 'assets/images/houses/house3.png', onPressed: () { 
                     Navigator.of(context).push(
                       MaterialPageRoute(builder: (context) => FeedPage())
                     );
@@ -74,7 +74,7 @@ class _HomePageState extends State<HomePage> {
 
               Row(
                 children: [
-                  HouseButton(imagePath: 'assets/images/houses/house3.png', onPressed: () {  },),
+                  HouseButton(imagePath: 'assets/images/houses/house2.png', onPressed: () {  },),
                   Spacer(),
                 ],
               ),
@@ -87,8 +87,8 @@ class _HomePageState extends State<HomePage> {
               ),
 
               
+              SizedBox(height: 48,)
 
-              const Spacer(flex: 3),
               
               /*
               Button(

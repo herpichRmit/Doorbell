@@ -1,5 +1,6 @@
 import 'dart:ffi';
 
+import 'package:doorbell/components/avatar.dart';
 import 'package:doorbell/pages/home.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -43,10 +44,15 @@ class _StartAvatarPageState extends State<StartAvatarPage> {
     });
   }
 
-  final List<Image> _avatars = [
-    Image.asset('assets/images/avatar-test1.svg'),
-    //Image.asset('assets/avatar2.png'),
-    //Image.asset('assets/avatar3.png'),
+  final List<String> _avatars = [
+    'assets/images/avatars/avatar1.png',
+    'assets/images/avatars/avatar2.png',
+    'assets/images/avatars/avatar3.png',
+    'assets/images/avatars/avatar4.png',
+    'assets/images/avatars/avatar5.png',
+    'assets/images/avatars/avatar6.png',
+    'assets/images/avatars/avatar7.png',
+    'assets/images/avatars/avatar8.png',
   ];
 
   final List<String> _houses = [
@@ -193,11 +199,11 @@ class _StartAvatarPageState extends State<StartAvatarPage> {
               if (_selectedHouse == "") {
                 showError('Please select one of the options above.');
               } else {
+                clearError();
                 setState(() {
                   _screen = 2;
                 });
               }
-
               
             },
           ),
@@ -268,24 +274,16 @@ class _StartAvatarPageState extends State<StartAvatarPage> {
               const SizedBox(height: 80), // height
               GestureDetector(
                 onTap: () => _changeAvatar(-1),
-                child: const SizedBox(width: 32, height: 32, child: DecoratedBox(decoration: BoxDecoration( color: Colors.grey))), // left chevron
+                child: Image.asset("assets/images/icons/Chevron-Left.png", height: 32, width: 32,) //left chevron
               ),
               const SizedBox(width: 24),
               Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  color: _selectedColor,
-                  shape: BoxShape.circle,
-                ),
-                child: ClipOval(
-                  child: _avatars[_currentAvatarIndex],
-                ),
+                child: Avatar(color: _selectedColor, imagePath: _avatars[_currentAvatarIndex], size: 120,)
               ),
               const SizedBox(width: 24),
               GestureDetector(
                 onTap: () => _changeAvatar(1),
-                child: const SizedBox(width: 32, height: 32, child: DecoratedBox(decoration: BoxDecoration( color: Colors.grey))), // right chevron
+                child: Image.asset("assets/images/icons/chevron-right.png", height: 32, width: 32,) //right chevron
               ),
             ],
           ),
