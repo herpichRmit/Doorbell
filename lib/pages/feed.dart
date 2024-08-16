@@ -95,7 +95,9 @@ class _FeedPageState extends State<FeedPage> {
               SizedBox(height: 12,),
               
               Column(children: [
-                PostCard(post: Post(id: "1234", avatar: Avatar(color: CupertinoColors.systemIndigo, imagePath: "assets/images/avatars/avatar8.png", size: 44,), title: "title", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin volutpat consectetur tellus, ac congue enim tincidunt eu. Etiam non est facilisis, posuere sapien in, finibus lectus.", images: List.empty(), timestamp: DateTime.now(), readBy: List.empty())),
+                PostCard(
+                  post: Post(id: "1234", avatar: Avatar(color: CupertinoColors.systemIndigo, imagePath: "assets/images/avatars/avatar8.png", size: 44,), title: "title", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin volutpat consectetur tellus, ac congue enim tincidunt eu. Etiam non est facilisis, posuere sapien in, finibus lectus.", images: List.empty(), timestamp: DateTime.now(), readBy: List.empty()), 
+                  onPressed: () => _showPostPopupSheet(context),), // TODO: change context to POST
                 SizedBox(height: 8,),
                 Button(
                   icon: Image.asset("assets/images/icons/plusfill.png"),

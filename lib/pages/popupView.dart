@@ -9,6 +9,7 @@ class PostPopupSheet extends StatefulWidget {
   final DateTime timestamp;
   final String description;
   final List<String> imageUrls;
+  final bool isEditiable;
 
   const PostPopupSheet({
     Key? key,
@@ -16,6 +17,7 @@ class PostPopupSheet extends StatefulWidget {
     required this.timestamp,
     required this.description,
     this.imageUrls = const [],
+    this.isEditiable = false,
   }) : super(key: key);
 
   @override
@@ -25,15 +27,18 @@ class PostPopupSheet extends StatefulWidget {
 class _PostPopupSheetState extends State<PostPopupSheet> {
   bool _isEditing = false;
   late TextEditingController _descriptionController;
+  late TextEditingController _titleController;
 
   @override
   void initState() {
     super.initState();
     _descriptionController = TextEditingController(text: widget.description);
+    _titleController = TextEditingController(text: widget.title);
   }
 
   @override
   void dispose() {
+    _titleController.dispose();
     _descriptionController.dispose();
     super.dispose();
   }
@@ -90,35 +95,39 @@ class _PostPopupSheetState extends State<PostPopupSheet> {
                               icon: Icon(CupertinoIcons.clear),
                               onPressed: () => Navigator.of(context).pop(),
                             ),
-                            PopupMenuButton<String>(
-                              onSelected: (value) {
-                                if (value == 'Edit') {
-                                  _editPost();
-                                } else if (value == 'Delete') {
-                                  _deletePost();
-                                }
-                              },
-                              itemBuilder: (BuildContext context) {
-                                return {'Edit', 'Delete'}.map((String choice) {
-                                  return PopupMenuItem<String>(
-                                    value: choice,
-                                    child: Text(choice),
-                                  );
-                                }).toList();
-                              },
-                            ),
+                            widget.isEditiable
+                              ? PopupMenuButton<String>(
+                                  onSelected: (value) {
+                                    if (value == 'Edit') {
+                                      _editPost();
+                                    } else if (value == 'Delete') {
+                                      _deletePost();
+                                    }
+                                  },
+                                  itemBuilder: (BuildContext context) {
+                                    return {'Edit', 'Delete'}.map((String choice) {
+                                      return PopupMenuItem<String>(
+                                        value: choice,
+                                        child: Text(choice),
+                                      );
+                                    }).toList();
+                                  },
+                                )
+                              : SizedBox(height: 44,),
                           ],
                         ),
                       ],
                     ),
                     SizedBox(height: 16.0),
-                    Text(
-                      widget.title,
-                      style: TextStyle(
-                        fontSize: 20.0,
-                        fontWeight: FontWeight.w700,
+                    _isEditing
+                    ? CustomTextField(controller: _titleController)
+                    : Text(
+                        widget.title,
+                        style: TextStyle(
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                    ),
                     Text(
                       '${widget.timestamp.hour}:${widget.timestamp.minute} ${widget.timestamp.hour >= 12 ? "PM" : "AM"}',
                       style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w600,),

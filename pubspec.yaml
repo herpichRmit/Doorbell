@@ -90,6 +90,10 @@ flutter:
     - assets/images/icons/tickfilled.png
     - assets/images/icons/crossfill.png
     - assets/images/icon.png
+    - assets/images/graphics/celebration_graphic.png
+    - assets/images/graphics/name_graphic.png
+    - assets/images/graphics/start_graphic.png
+    - assets/images/graphics/start-neigh_graphic.png
   
 
 flutter_launcher_icons:
