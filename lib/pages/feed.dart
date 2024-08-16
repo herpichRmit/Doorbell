@@ -1,5 +1,6 @@
 import 'dart:ffi';
 import 'package:doorbell/components/avatar.dart';
+import 'package:doorbell/pages/popupView.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -99,12 +100,7 @@ class _FeedPageState extends State<FeedPage> {
                 Button(
                   icon: Image.asset("assets/images/icons/plusfill.png"),
                   text: 'Add Post',
-                  onPressed: () async {
-
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => DebugPage())
-                    );
-                  },
+                  onPressed: () => _showPostPopupSheet(context),
                 ),
                 SizedBox(height: 8,),
                 Button(
@@ -122,6 +118,22 @@ class _FeedPageState extends State<FeedPage> {
           ),
         ),
       ),
+    );
+  }
+
+  void _showPostPopupSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return PostPopupSheet(
+          title: 'Post Title',
+          timestamp: DateTime.now(),
+          description: 'This is a detailed description of the post.',
+          imageUrls: [],
+        );
+      },
     );
   }
 

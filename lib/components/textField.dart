@@ -6,6 +6,7 @@ class CustomTextField extends StatefulWidget {
   final String placeholder;
   final bool isPassword;
   final bool isError;
+  final bool isMultiLine;
 
   const CustomTextField({
     Key? key,
@@ -13,6 +14,7 @@ class CustomTextField extends StatefulWidget {
     this.placeholder = 'Enter your text...',
     this.isPassword = false,
     this.isError = false,
+    this.isMultiLine = false,
   }) : super(key: key);
 
   @override
@@ -31,12 +33,12 @@ class _CustomTextFieldState extends State<CustomTextField> {
         });
       },
       child: SizedBox(
-        height: 36,
+        height: widget.isMultiLine ? 144 : 36,
         width: double.infinity,
         child: Stack(
           children: [
             AnimatedContainer(
-              duration: const Duration(milliseconds: 20),
+              duration: const Duration(milliseconds: 200),
               curve: Curves.easeInOut,
               decoration: BoxDecoration(
                 color: CupertinoColors.transparent,
@@ -66,6 +68,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
                   child: TextField(
                     controller: widget.controller,
                     obscureText: widget.isPassword,
+                    maxLines: widget.isMultiLine ? 6 : 1,
                     decoration: InputDecoration(
                       hintText: widget.placeholder,
                       hintStyle: TextStyle(
