@@ -67,10 +67,8 @@ class _StartNeighbourhoodState extends State<StartNeighbourhoodPage> {
                 child: const Text('Your neighbourhood awaits', style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w600, letterSpacing: -0.45, height: 1.2, color: Colors.black)),
               ),
               const SizedBox(height: 24),
-              const SizedBox( // Image
-                width: double.infinity,
-                height: 200,
-                child: DecoratedBox(decoration: BoxDecoration( color: Colors.green))
+              Center(
+                child: Image.asset("assets/images/graphics/start-neigh_graphic.png", height: 200,),
               ),
               const SizedBox(height: 32),
               

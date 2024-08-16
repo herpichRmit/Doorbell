@@ -222,12 +222,10 @@ class _StartAvatarPageState extends State<StartAvatarPage> {
             child: Text('What do we call you?', style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w600, letterSpacing: -0.45, height: 1.2, color: Colors.black)),
           ),
           const SizedBox(height: 24),
-          const SizedBox( // Image
-            width: double.infinity,
-            height: 200,
-            child: DecoratedBox(decoration: BoxDecoration( color: Colors.orange))
+          Center(
+            child: Image.asset("assets/images/graphics/name_graphic.png", height: 220,),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 12),
           CustomTextField(placeholder: 'Enter name...', controller: nameController, isError: checkError(),),
           const SizedBox(height: 8),
           Button(
@@ -353,10 +351,16 @@ class _StartAvatarPageState extends State<StartAvatarPage> {
             child: Text('You are ready to go', style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w600, letterSpacing: -0.45, height: 1.2, color: Colors.black)),
           ),
           const SizedBox(height: 24),
-          const SizedBox( // Image
-            width: double.infinity,
-            height: 200,
-            child: DecoratedBox(decoration: BoxDecoration( color: Colors.purple))
+          Stack(
+            children: [
+              Center(
+                heightFactor: 1.8,
+                child: Avatar(color: _selectedColor, imagePath: _avatars[_currentAvatarIndex]),
+              ),
+              Center(
+                child: Image.asset("assets/images/graphics/celebration_graphic.png", height: 200,),
+              ),
+            ],
           ),
           const SizedBox(height: 32),
           const Text('Welcome to your neighbourhood', style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.normal, letterSpacing: 0, color: Colors.black)),

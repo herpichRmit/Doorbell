@@ -65,10 +65,8 @@ class _StartPageState extends State<StartPage> {
               const Text('Stay Connected', style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600, letterSpacing: -0.26)),
               const Text('Find your family\'s Neighbourhood', style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.w600, letterSpacing: -0.26, height: 1.2, color: CupertinoColors.systemGrey)),
               const SizedBox(height: 24),
-              const SizedBox( // Image
-                width: double.infinity,
-                height: 200,
-                child: DecoratedBox(decoration: BoxDecoration( color: Colors.red))
+              Center(
+                child: Image.asset("assets/images/graphics/start_graphic.png", height: 200,),
               ),
               const SizedBox(height: 32),
               getWidgets(),
