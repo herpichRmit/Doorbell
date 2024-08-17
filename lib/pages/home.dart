@@ -56,7 +56,12 @@ class _HomePageState extends State<HomePage> {
                     Navigator.of(context).push(
                       MaterialPageRoute(builder: (context) => DebugPage())
                     );
-                   },),
+                   },
+                   avatars: [
+                    Avatar(color: CupertinoColors.systemPink, imagePath: "assets/images/avatars/avatar1.png", size: 60),
+                    Avatar(color: CupertinoColors.systemPink, imagePath: "assets/images/avatars/avatar1.png", size: 60),
+                   ],
+                   ),
                   Spacer(),
                 ],
               ),
@@ -68,13 +73,17 @@ class _HomePageState extends State<HomePage> {
                     Navigator.of(context).push(
                       MaterialPageRoute(builder: (context) => FeedPage())
                     );
-                   },),
+                   },
+                   avatars: [
+                    Avatar(color: CupertinoColors.systemPink, imagePath: "assets/images/avatars/avatar1.png", size: 60),
+                   ],
+                  ),
                 ],
               ),
 
               Row(
                 children: [
-                  HouseButton(imagePath: 'assets/images/houses/house2.png', onPressed: () {  },),
+                  HouseButton(imagePath: 'assets/images/houses/house2.png', onPressed: () {  }, avatars: [],),
                   Spacer(),
                 ],
               ),
@@ -82,7 +91,7 @@ class _HomePageState extends State<HomePage> {
               Row(
                 children: [
                   Spacer(),
-                  HouseButton(imagePath: 'assets/images/houses/house4.png', onPressed: () {  },),
+                  HouseButton(imagePath: 'assets/images/houses/house4.png', onPressed: () {  }, avatars: [],),
                 ],
               ),
 

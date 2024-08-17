@@ -1,3 +1,4 @@
+import 'package:doorbell/components/avatar.dart';
 import 'package:flutter/material.dart';
 
 class HouseButton extends StatefulWidget {
@@ -5,6 +6,7 @@ class HouseButton extends StatefulWidget {
   final VoidCallback onPressed;
   final double width;
   final double height;
+  final List<Avatar> avatars;
 
   const HouseButton({
     Key? key,
@@ -12,6 +14,7 @@ class HouseButton extends StatefulWidget {
     required this.onPressed,
     this.width = 210.0,
     this.height = 155.0,
+    required this.avatars,
   }) : super(key: key);
 
   @override
@@ -53,18 +56,37 @@ class _HouseButtonState extends State<HouseButton> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: _onTapDown,
-      onTapUp: _onTapUp,
-      onTapCancel: _onTapCancel,
-      child: ScaleTransition(
-        scale: _animation,
-        child: Image.asset(
-          widget.imagePath,
-          width: widget.width,
-          height: widget.height,
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        GestureDetector(
+          onTapDown: _onTapDown,
+          onTapUp: _onTapUp,
+          onTapCancel: _onTapCancel,
+          child: ScaleTransition(
+            scale: _animation,
+            child: Image.asset(
+              widget.imagePath,
+              width: widget.width,
+              height: widget.height,
+            ),
+          ),
         ),
-      ),
+        Positioned(
+          bottom: -40,
+          child: Center(
+            child: Container(
+              width: 200,
+              child: Wrap(
+                children: widget.avatars.map((avatar) {
+                  return avatar;
+                }).toList(),
+              ),
+            ),
+          ),
+        )
+        
+      ],
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:doorbell/components/avatar.dart';
 import 'package:doorbell/components/button.dart';
+import 'package:doorbell/components/splashSmallText.dart';
 import 'package:doorbell/components/textField.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -10,6 +11,7 @@ class PostPopupSheet extends StatefulWidget {
   final String description;
   final List<String> imageUrls;
   final bool isEditiable;
+  final bool isNew;
 
   const PostPopupSheet({
     Key? key,
@@ -17,7 +19,8 @@ class PostPopupSheet extends StatefulWidget {
     required this.timestamp,
     required this.description,
     this.imageUrls = const [],
-    this.isEditiable = false,
+    this.isEditiable = true,
+    this.isNew = true,
   }) : super(key: key);
 
   @override
@@ -26,8 +29,10 @@ class PostPopupSheet extends StatefulWidget {
 
 class _PostPopupSheetState extends State<PostPopupSheet> {
   bool _isEditing = false;
+  bool _isTitleEmpty = false;
   late TextEditingController _descriptionController;
   late TextEditingController _titleController;
+  
 
   @override
   void initState() {
@@ -53,11 +58,27 @@ class _PostPopupSheetState extends State<PostPopupSheet> {
     // Implement post deletion logic
   }
 
-  void _saveChanges() {
-    // Implement save changes logic
+  void _createPost() {
+
     setState(() {
+      _isTitleEmpty = _titleController.text.isEmpty;
       _isEditing = false;
     });
+
+    // Create post logic here
+  }
+
+  void _saveChanges() {
+
+    setState(() {
+      _isTitleEmpty = _titleController.text.isEmpty;
+
+      if (!_isTitleEmpty){
+        _isEditing = false;
+      }
+    });
+
+    // Save changes logic here
   }
 
   void _addImages() {
@@ -95,7 +116,7 @@ class _PostPopupSheetState extends State<PostPopupSheet> {
                               icon: Icon(CupertinoIcons.clear),
                               onPressed: () => Navigator.of(context).pop(),
                             ),
-                            widget.isEditiable
+                            widget.isEditiable & !widget.isNew
                               ? PopupMenuButton<String>(
                                   onSelected: (value) {
                                     if (value == 'Edit') {
@@ -119,26 +140,68 @@ class _PostPopupSheetState extends State<PostPopupSheet> {
                       ],
                     ),
                     SizedBox(height: 16.0),
-                    _isEditing
-                    ? CustomTextField(controller: _titleController)
-                    : Text(
-                        widget.title,
-                        style: TextStyle(
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
+                    GestureDetector(
+                      onDoubleTap: _isEditing ? null : _editPost,
+                      child: _isEditing
+                          ? TextField(
+                              controller: _titleController,
+                              decoration: InputDecoration(
+                                hintText: 'Title',
+                                border: InputBorder.none,
+                              ),
+                              style: TextStyle(
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              maxLines: 1,
+                            )
+                          : Text(
+                              _titleController.text.isEmpty
+                                  ? 'Type your post here...'
+                                  : _titleController.text,
+                              style: TextStyle(
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.bold,
+                                color: _titleController.text.isEmpty
+                                    ? CupertinoColors.systemGrey
+                                    : Colors.black,
+                              ),
+                            ),
+                    ),
+                    SizedBox(height: 8.0),
                     Text(
                       '${widget.timestamp.hour}:${widget.timestamp.minute} ${widget.timestamp.hour >= 12 ? "PM" : "AM"}',
-                      style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w600,),
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     SizedBox(height: 16.0),
-                    _isEditing
-                        ? CustomTextField(controller: _descriptionController, isMultiLine: true,)
-                        : Text(
-                            widget.description,
-                            style: TextStyle(fontSize: 16.0),
-                          ),
+                    GestureDetector(
+                      onDoubleTap: _isEditing ? null : _editPost,
+                      child: _isEditing
+                          ? TextField(
+                              controller: _descriptionController,
+                              decoration: InputDecoration(
+                                hintText: 'Type your description here',
+                                border: InputBorder.none,
+                              ),
+                              maxLines: null,
+                              style: TextStyle(fontSize: 16.0),
+                            )
+                          : Text(
+                              _descriptionController.text.isEmpty
+                                  ? 'desc'
+                                  : _descriptionController.text,
+                              style: TextStyle(
+                                fontSize: 16.0,
+                                color: _descriptionController.text.isEmpty
+                                    ? CupertinoColors.systemGrey
+                                    : Colors.black,
+                              ),
+                            ),
+                    ),
+
                     SizedBox(height: 16.0),
                     SizedBox(height: 8,),
                     if (_isEditing)
@@ -162,17 +225,25 @@ class _PostPopupSheetState extends State<PostPopupSheet> {
                         ),
                       ),
                       SizedBox(height: 8,),
-                    if (_isEditing)
+                    if (_isEditing & !widget.isNew)
                       Button(
                         text: 'Save Changes',
                         onPressed: _saveChanges,
                       ),
+                    if (_isEditing & widget.isNew)
+                      Button(
+                        text: 'Create Post',
+                        onPressed: _createPost,
+                      ),
+                    SizedBox(height: 4,),
+                    if (_isTitleEmpty)
+                      SplashSmallText(text: 'Title can\'t be empty.', backOption: false, isError: true,),
                   ],
                 ),
               ),
               Positioned(
                 top: 36,
-                left: 8,
+                left: 10,
                 child: Avatar(color: CupertinoColors.systemBrown, imagePath: 'assets/images/avatars/avatar1.png', size: 100,),
               ),
             ],

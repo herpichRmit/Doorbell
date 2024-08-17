@@ -2,6 +2,7 @@ import 'dart:ffi';
 import 'package:doorbell/components/avatar.dart';
 import 'package:doorbell/pages/popupView.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -17,7 +18,6 @@ import '../components/houseButton.dart';
 import '../components/post.dart';
 
 import '../model/post.dart';
-
 
 
 //import 'package:cloud_firestore/cloud_firestore.dart';
@@ -39,6 +39,15 @@ class _FeedPageState extends State<FeedPage> {
   //  .orderBy("date", descending: true) // OPTIONAL: Set an order
   //  .snapshots(); // Get notified of any changes to the collection
 
+  var user = FirebaseAuth.instance.currentUser;
+
+  bool _checkUserId(String id) {
+    if (user?.uid == id) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -96,13 +105,14 @@ class _FeedPageState extends State<FeedPage> {
               
               Column(children: [
                 PostCard(
-                  post: Post(id: "1234", avatar: Avatar(color: CupertinoColors.systemIndigo, imagePath: "assets/images/avatars/avatar8.png", size: 44,), title: "title", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin volutpat consectetur tellus, ac congue enim tincidunt eu. Etiam non est facilisis, posuere sapien in, finibus lectus.", images: List.empty(), timestamp: DateTime.now(), readBy: List.empty()), 
-                  onPressed: () => _showPostPopupSheet(context),), // TODO: change context to POST
+                  post: Post(id: "1234", avatar: Avatar(color: CupertinoColors.systemIndigo, imagePath: "assets/images/avatars/avatar8.png", size: 44,), title: "title", description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin volutpat consectetur tellus, ac congue enim tincidunt eu. Etiam non est facilisis, posuere sapien in, finibus lectus.", images: List.empty(), timestamp: DateTime.now(), readBy: List.empty(), userId: '1234'), 
+                  onPressed: () => _showPostPopupSheet(context, isEditiable: _checkUserId("1234"), isNew: false), // if user id == post.userId
+                ),
                 SizedBox(height: 8,),
                 Button(
                   icon: Image.asset("assets/images/icons/plusfill.png"),
                   text: 'Add Post',
-                  onPressed: () => _showPostPopupSheet(context),
+                  onPressed: () => _showPostPopupSheet(context, isEditiable: true, isNew: true),
                 ),
                 SizedBox(height: 8,),
                 Button(
@@ -123,7 +133,7 @@ class _FeedPageState extends State<FeedPage> {
     );
   }
 
-  void _showPostPopupSheet(BuildContext context) {
+  void _showPostPopupSheet(BuildContext context, {required bool isEditiable, required bool isNew}) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -134,6 +144,8 @@ class _FeedPageState extends State<FeedPage> {
           timestamp: DateTime.now(),
           description: 'This is a detailed description of the post.',
           imageUrls: [],
+          isEditiable: isEditiable,
+          isNew: isNew,
         );
       },
     );

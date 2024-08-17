@@ -1,13 +1,17 @@
-//import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:ui';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:doorbell/components/avatar.dart';
 
 class User {
   final String id;
   final String email;
   final String name;
   final String avatar;
-  final String avatarColor;
+  final Color avatarColor;
   final String houseID;
   final String neighID;
+  final DateTime lastOnline;
 
   User({
     required this.id,
@@ -17,6 +21,7 @@ class User {
     required this.avatarColor,
     required this.houseID,
     required this.neighID,
+    required this.lastOnline,
   });
 
   // Convert a User into a Map
@@ -26,9 +31,10 @@ class User {
       'email': email,
       'name': name,
       'avatar': avatar,
-      'avatar_color': avatarColor,
+      'avatarColor': avatarColor.value, // Convert Color to integer
       'houseID': houseID,
       'neighID': neighID,
+      'lastOnline': lastOnline,
     };
   }
 
@@ -39,14 +45,16 @@ class User {
       email: map['email'] ?? '',
       name: map['name'] ?? '',
       avatar: map['avatar'] ?? '',
-      avatarColor: map['avatar_color'] ?? '',
+      avatarColor: Color(map['avatarColor'] ?? 0xFFFFFFFF), // Convert integer back to Color
       houseID: map['houseID'] ?? '',
       neighID: map['neighID'] ?? '',
+      lastOnline: (map['lastOnline'] as Timestamp).toDate(), // Convert Timestamp to DateTime
     );
   }
 }
 
-/*
+
+
 
 class UserService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -56,11 +64,13 @@ class UserService {
       _firestore.collection('users');
 
   // Create or Update User
-  Future<void> setUser(User user) async {
+  Future<bool> setUser(User user) async {
     try {
       await _userCollection.doc(user.id).set(user.toMap());
+      return true;
     } catch (e) {
       print('Error setting user: $e');
+      return false;
     }
   }
 
@@ -81,11 +91,13 @@ class UserService {
   }
 
   // Update User (example of updating specific fields)
-  Future<void> updateUser(User user) async {
+  Future<bool> updateUser(User user) async {
     try {
       await _userCollection.doc(user.id).update(user.toMap());
+      return true;
     } catch (e) {
       print('Error updating user: $e');
+      return false;
     }
   }
 
@@ -99,10 +111,16 @@ class UserService {
   }
 
   // Check if user exists
-  Future<bool> userExists(String userId) async {
+  Future<bool> userExists(String email) async {
     try {
-      DocumentSnapshot doc = await _userCollection.doc(userId).get();
-      return doc.exists;
+      // Query Firestore for documents where the email field matches the provided email
+      QuerySnapshot querySnapshot = await _userCollection
+          .where('email', isEqualTo: email)
+          .limit(1) // Limiting to 1 document for efficiency
+          .get();
+
+      // Check if any documents were found
+      return querySnapshot.docs.isNotEmpty;
     } catch (e) {
       print('Error checking if user exists: $e');
       return false;
@@ -110,4 +128,3 @@ class UserService {
   }
   
 }
-*/

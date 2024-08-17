@@ -4,6 +4,7 @@ import 'package:doorbell/components/avatar.dart';
 
 class Post {
   final String id;
+  final String userId;
   final Avatar avatar;
   final String title;
   final String description;
@@ -13,6 +14,7 @@ class Post {
 
   Post({
     required this.id,
+    required this.userId,
     required this.avatar,
     required this.title,
     required this.description,

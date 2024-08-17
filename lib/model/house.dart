@@ -1,24 +1,18 @@
-//import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class House {
   final String id;
   final String neighID;
-  final int houseType;
-  final List<String> colors;
 
   House({
     required this.id,
     required this.neighID,
-    required this.houseType,
-    required this.colors,
   });
 
   // Convert a House into a Map
   Map<String, dynamic> toMap() {
     return {
       'neighID': neighID,
-      'houseType': houseType,
-      'colors': colors,
     };
   }
 
@@ -27,13 +21,11 @@ class House {
     return House(
       id: id,
       neighID: map['neighID'] ?? '',
-      houseType: map['houseType'] ?? 0,
-      colors: List<String>.from(map['colors'] ?? []),
     );
   }
 }
 
-/*
+
 class HouseService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -42,11 +34,13 @@ class HouseService {
       _firestore.collection('houses');
 
   // Create or Update House
-  Future<void> setHouse(House house) async {
+  Future<bool> setHouse(House house) async {
     try {
       await _houseCollection.doc(house.id).set(house.toMap());
+      return true;
     } catch (e) {
       print('Error setting house: $e');
+      return false;
     }
   }
 
@@ -95,4 +89,3 @@ class HouseService {
     }
   }
 }
-*/
