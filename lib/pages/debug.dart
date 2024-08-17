@@ -136,7 +136,8 @@ class _DebugPageState extends State<DebugPage> {
               const SizedBox(height: 32),
               Button(
                 text: 'create a house',
-                onPressed: () {
+                onPressed: () async {
+                  var house = my_house.House(id: "0001", neighID: "0001");
                   bool result = await my_house.HouseService().setHouse(house);
                   if (result) {
                     print('Success');
@@ -149,6 +150,25 @@ class _DebugPageState extends State<DebugPage> {
               Button(
                 text: 'get houses with certain neigh id',
                 onPressed: () {
+                  
+                },
+              ),
+              const SizedBox(height: 32),
+              Button(
+                text: 'get user with specific ID',
+                onPressed: () {
+                  
+                },
+              ),
+              const SizedBox(height: 32),
+              Button(
+                text: 'get all users and print ID',
+                onPressed: () async {
+                  List<my_user.User> result = await my_user.UserService().getAllUsers();
+
+                  for (var i = 0; i < result.length; i++) {
+                    print(result[i]);
+                  }
                   
                 },
               ),

@@ -6,12 +6,12 @@ import 'package:doorbell/components/avatar.dart';
 class User {
   final String id;
   final String email;
-  final String name;
-  final String avatar;
-  final Color avatarColor;
-  final String houseID;
-  final String neighID;
-  final DateTime lastOnline;
+  String name;
+  String avatar;
+  Color avatarColor;
+  String houseID;
+  String neighID;
+  DateTime lastOnline;
 
   User({
     required this.id,
@@ -77,16 +77,64 @@ class UserService {
   // Read User
   Future<User?> getUser(String userId) async {
     try {
+      // Debugging: Print the userId to ensure it's correct
+      print('Fetching user with ID: $userId');
+      
       DocumentSnapshot doc = await _userCollection.doc(userId).get();
+      
       if (doc.exists) {
-        return User.fromMap(doc.data() as Map<String, dynamic>);
+        print('User document found: ${doc.data()}');
+        
+        // Ensure all expected fields are present in the document
+        if (doc.data() != null) {
+          return User.fromMap(doc.data() as Map<String, dynamic>);
+        } else {
+          print('Document exists but data is null.');
+          return null;
+        }
       } else {
-        print('User not found');
+        print('User document with ID $userId not found.');
         return null;
       }
     } catch (e) {
       print('Error getting user: $e');
       return null;
+    }
+  }
+
+  // Function to get all user names by houseID
+  Future<List<String>> getUserNamesByHouseID(String houseID) async {
+    try {
+      // Query the users collection where houseID matches the provided value
+      QuerySnapshot querySnapshot = await _userCollection
+          .where('houseID', isEqualTo: houseID)
+          .get();
+
+      // Map the query results to a list of usernames
+      List<String> names = querySnapshot.docs.map((doc) {
+        return doc['name'] as String; // Extracting the name field
+      }).toList();
+
+      return names;
+    } catch (e) {
+      print('Error getting usernames by houseID: $e');
+      return [];
+    }
+  }
+
+  Future<List<User>> getAllUsers() async {
+    try {
+      QuerySnapshot querySnapshot = await _userCollection.get();
+      
+      // Map each document to a User object
+      List<User> users = querySnapshot.docs.map((doc) {
+        return User.fromMap(doc.data() as Map<String, dynamic>);
+      }).toList();
+
+      return users;
+    } catch (e) {
+      print('Error getting all users: $e');
+      return [];
     }
   }
 

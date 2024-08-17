@@ -2,12 +2,14 @@ import 'dart:ffi';
 
 import 'package:doorbell/pages/start.dart';
 import 'package:doorbell/pages/startAvatar.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
 import '../components/button.dart'; // Import your custom button component
 import 'package:flutter/cupertino.dart';
 import '../components/splashSmallText.dart';
 import '../components/textField.dart';
+import 'package:doorbell/model/neigh.dart' as my_neigh;
+import 'package:doorbell/model/user.dart' as my_user;
 
 
 class StartNeighbourhoodPage extends StatefulWidget {
@@ -141,26 +143,34 @@ class _StartNeighbourhoodState extends State<StartNeighbourhoodPage> {
                   } else if (!isValidPassword(hostNeighPasswordController.text)) {
                     showError('Password is too weak.');
                     deActivateLoading();
-                  } else { // TODO: function to create passwords after firestore integration
-                    //bool result = await signup(signupEmailController.text, signupPasswordController.text);
-                    deActivateLoading();
+                  } else { 
+                    var result = await my_neigh.NeighService().createNeigh(hostNeighPasswordController.text);
+                    deActivateLoading(); 
 
-                    // FUNCTION 1
-                    //check if neighbourhood ID + password exist
-                    
-                    // FUNCTION 2
-                    //var currentUser = FirebaseAuth.instance.currentUser;
-                    //create document in firestore with neighbourhood id
+                    if (result != null) {
+                      _neighbourhoodId = result;
+                      // get user
+                      var uid = auth.FirebaseAuth.instance.currentUser?.uid;
+                      if (uid != null) {
+                        var user = await my_user.UserService().getUser(uid);
+                        if (user != null) {
+                          user.neighID = _neighbourhoodId;
+                          bool result = await my_user.UserService().updateUser(user);
 
-                    // TODO: get neighbourhood id back from firestore and save for next screen
-
-                    //if (result == true) {
+                          if (result == true) {
+                            setState(() {
+                              _showWidgets = 3;
+                            });
+                          }
+                        }
+                      }
                       clearControllers();
                       clearError();
-                      setState(() {
-                        _showWidgets = 3;
-                      });
-                    //} 
+                      deActivateLoading();
+                      
+                    } else {
+                      showError('An error has occured, please try again');
+                    }
                   }
                 },
               ),
@@ -177,11 +187,13 @@ class _StartNeighbourhoodState extends State<StartNeighbourhoodPage> {
         children: [
           const Text('Your neighbourhood ID', style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.normal, letterSpacing: 0, height: 1.2, color: Colors.black)),
           const SizedBox(height: 4),
-          const Text('<ID HERE>', style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.w500, letterSpacing: 0, height: 1.2, color: Colors.black)),
+          Text(_neighbourhoodId, style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.w500, letterSpacing: 0, height: 1.2, color: Colors.black)),
           const SizedBox(height: 32),
           Button(
             text: 'Next',
             onPressed: () async {
+
+
 
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (context) => StartAvatarPage())
@@ -215,19 +227,22 @@ class _StartNeighbourhoodState extends State<StartNeighbourhoodPage> {
                     showError('ID cannot be empty.');
                     deActivateLoading();
                   
-                  // TODO: async function call to check if neighbourhood exists
                   } else {
-                    //bool result = await func()
+                    bool result = await my_neigh.NeighService().doesNeighExist(joinNeighIDController.text);
+                    deActivateLoading();
 
-                    //if (result == true){
-                      deActivateLoading();
+                    if (result == true){
+                      _neighbourhoodId = joinNeighIDController.text;
+
                       clearControllers();
                       clearError();
 
                       setState(() {
                         _showWidgets = 5;
                       });
-                    //}
+                    } else {
+                      showError('Neighbourhood ID does not exist, please try again.');
+                    }
                   }
                   
                 },
@@ -250,7 +265,7 @@ class _StartNeighbourhoodState extends State<StartNeighbourhoodPage> {
                 
                 text: 'Join',
                 isLoading: _isLoading,
-                onPressed: () {
+                onPressed: () async {
                   activateLoading();
 
                   // is password empty
@@ -259,18 +274,33 @@ class _StartNeighbourhoodState extends State<StartNeighbourhoodPage> {
                     deActivateLoading();
                   // if not, try to login to neighbourhood
                   } else {
-                    //bool result = await authNeighbourhood(_email, loginPasswordController.text);
-                    deActivateLoading();
+                    bool result = await my_neigh.NeighService().validateNeighCredentials(_neighbourhoodId, joinNeighPasswordController.text);
                     
-                    //if (result == true) {
+                    if (result == true) {
                       clearControllers();
                       clearError();
-                      // If login is successful, navigate to the next page
-                      // TODO: do checks here on user to make sure user has neighbourhood and house already
-                      setState(() {
-                        _showWidgets = 6;
-                      });
-                    //}
+
+                      var uid = auth.FirebaseAuth.instance.currentUser?.uid;
+                      if (uid != null) {
+                        var user = await my_user.UserService().getUser(uid);
+                        if (user != null) {
+                          user.neighID = _neighbourhoodId;
+                          bool result = await my_user.UserService().updateUser(user);
+
+                          if (result == true) {
+                            setState(() {
+                              _showWidgets = 6;
+                            });
+                          }
+                          
+                        }
+                      }
+                      deActivateLoading();
+                      
+                    } else {
+                      showError('Incorrect password, please try again');
+                      deActivateLoading();
+                    }
                   }
                 }
               ),
