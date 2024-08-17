@@ -8,12 +8,16 @@ import 'package:doorbell/pages/start.dart';
 import 'package:doorbell/pages/debug.dart';
 import 'package:doorbell/pages/feed.dart';
 import 'startNeighbourhood.dart';
+import 'package:doorbell/pages/popupView.dart';
+import 'package:doorbell/pages/doorbellNotification.dart';
 
 import 'package:doorbell/pages/debug.dart';
 import '../components/splashSmallText.dart';
 import '../components/textField.dart';
 import '../components/button.dart';
 import '../components/houseButton.dart';
+import 'package:doorbell/pages/help.dart';
+
 
 
 
@@ -44,76 +48,129 @@ class _HomePageState extends State<HomePage> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(32), // 16 is apple HIGs standard, lets do 32 for onboarding screens.
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: Stack(
             children: [
-              SizedBox(height: 40),
-              
-              Row(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  HouseButton(imagePath: 'assets/images/houses/house1.png', onPressed: () { 
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => DebugPage())
-                    );
-                   },
-                   avatars: [
-                    Avatar(color: CupertinoColors.systemPink, imagePath: "assets/images/avatars/avatar1.png", size: 60),
-                    Avatar(color: CupertinoColors.systemPink, imagePath: "assets/images/avatars/avatar1.png", size: 60),
-                   ],
-                   ),
-                  Spacer(),
-                ],
-              ),
-
-              Row(
-                children: [
-                  Spacer(),
-                  HouseButton(imagePath: 'assets/images/houses/house3.png', onPressed: () { 
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => FeedPage())
-                    );
-                   },
-                   avatars: [
-                    Avatar(color: CupertinoColors.systemPink, imagePath: "assets/images/avatars/avatar1.png", size: 60),
-                   ],
+                  SizedBox(height: 40),
+                  
+                  Row(
+                    children: [
+                      HouseButton(imagePath: 'assets/images/houses/house1.png', onPressed: () { 
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (context) => DebugPage())
+                        );
+                      },
+                      avatars: [
+                        Avatar(color: CupertinoColors.systemPink, imagePath: "assets/images/avatars/avatar1.png", size: 60),
+                        Avatar(color: CupertinoColors.systemPink, imagePath: "assets/images/avatars/avatar1.png", size: 60),
+                      ],
+                      ),
+                      Spacer(),
+                    ],
                   ),
-                ],
-              ),
-
-              Row(
-                children: [
-                  HouseButton(imagePath: 'assets/images/houses/house2.png', onPressed: () {  }, avatars: [],),
-                  Spacer(),
-                ],
-              ),
-
-              Row(
-                children: [
-                  Spacer(),
-                  HouseButton(imagePath: 'assets/images/houses/house4.png', onPressed: () {  }, avatars: [],),
-                ],
-              ),
-
               
-              SizedBox(height: 48,)
-
+                  Row(
+                    children: [
+                      Spacer(),
+                      HouseButton(imagePath: 'assets/images/houses/house3.png', onPressed: () { 
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (context) => FeedPage())
+                        );
+                      },
+                      avatars: [
+                        Avatar(color: CupertinoColors.systemPink, imagePath: "assets/images/avatars/avatar1.png", size: 60),
+                      ],
+                      ),
+                    ],
+                  ),
               
-              /*
-              Button(
-                text: 'debug',
-                onPressed: () async {
-
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => DebugPage())
-                  );
-                },
-              ),*/
-            ],
+                  Row(
+                    children: [
+                      HouseButton(imagePath: 'assets/images/houses/house2.png', onPressed: () {  }, avatars: [],),
+                      Spacer(),
+                    ],
+                  ),
+              
+                  Row(
+                    children: [
+                      Spacer(),
+                      HouseButton(imagePath: 'assets/images/houses/house4.png', onPressed: () {  }, avatars: [],),
+                    ],
+                  ),
+              
+                  
+                  SizedBox(height: 48,),
+                ],
+              ),
+              Row(
+                children: [ 
+                  Spacer(),
+                  Column(
+                    children: [
+                      ElevatedButton(
+                        child: Text('?',     
+                          style: TextStyle(
+                          fontSize: 20, // Text size
+                          fontWeight: FontWeight.bold, // Bold text
+                          color: CupertinoColors.systemGrey6, 
+                          )
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (context) => HelpPage())
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: CupertinoColors.systemGrey2, // TODO: link to notification object
+                            shape: CircleBorder(), 
+                            padding: EdgeInsets.all(12), 
+                          )
+                      ),
+                  
+                      SizedBox(height: 12),
+                      
+                      ElevatedButton(
+                        child: Text('!',     
+                          style: TextStyle(
+                          fontSize: 20, // Text size
+                          fontWeight: FontWeight.bold, // Bold text
+                          color:CupertinoColors.systemGrey6, 
+                          )
+                        ),
+                        onPressed: () => _showDoorbellPopupSheet(context, isEditiable: true, isNew: true),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: CupertinoColors.systemGreen, // TODO: link to notification object
+                          shape: CircleBorder(), 
+                          padding: EdgeInsets.all(12), 
+                        )
+                      ),
+                  ],
+                ),
+              ],),
+            ] 
           ),
         ),
       ),
     );
   }
 
+
+
+  void _showDoorbellPopupSheet(BuildContext context, {required bool isEditiable, required bool isNew}) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return DoorbellPopupSheet(
+          name: 'Ethan',
+          avatarPath: 'assets/images/avatars/avatar1.png',
+          avatarColor: CupertinoColors.activeGreen,
+        );
+      },
+    );
+  }
 }
