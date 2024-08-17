@@ -1,13 +1,16 @@
 import 'dart:ffi';
 
 import 'package:doorbell/components/avatar.dart';
+import 'package:doorbell/model/house.dart';
 import 'package:doorbell/pages/home.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
 import '../components/button.dart'; // Import your custom button component
 import 'package:flutter/cupertino.dart';
 import '../components/splashSmallText.dart';
 import '../components/textField.dart';
+import 'package:doorbell/model/house.dart' as my_house;
+import 'package:doorbell/model/user.dart' as my_user;
 //final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
 
@@ -37,6 +40,7 @@ class _StartAvatarPageState extends State<StartAvatarPage> {
   String _selectedHouse = "";
   String _error = "";
   bool _isLoading = false;
+  String _name = "";
 
   void _selectHouse(String house) {
     setState(() {
@@ -55,11 +59,62 @@ class _StartAvatarPageState extends State<StartAvatarPage> {
     'assets/images/avatars/avatar8.png',
   ];
 
-  final List<String> _houses = [
-    "John and Jane", 
-    "Catherine",  
-    "I don't live with any of these people",  
-  ];
+  String formatHouseName(List<String> names) {
+    if (names.isEmpty) return ''; // Handle empty list case
+
+    if (names.length == 1) {
+      return "${names[0]}'s house";
+    } else if (names.length == 2) {
+      return "${names[0]} and ${names[1]}'s house";
+    } else {
+      // Join all names except the last two with a comma
+      String allButLastTwo = names.sublist(0, names.length - 2).join(', ');
+      // Get the last two names
+      String lastTwo = "${names[names.length - 2]} and ${names[names.length - 1]}";
+
+      return "$allButLastTwo, $lastTwo's house";
+    }
+  }
+
+  Future<List<(String, String)>> _getHouses() async {
+
+  var uid = auth.FirebaseAuth.instance.currentUser?.uid;
+  var neighID = "0";
+
+  // use that user ID to get the user from firestore
+  if (uid != null) {
+    var user = await my_user.UserService().getUser(uid);
+    if (user != null) {
+      neighID = user.neighID;
+    }
+  }
+  
+  // get all house IDs with neighID
+  var houses = await my_house.HouseService().getHousesByNeighID(neighID);
+
+  List<(String, String)> list = [];
+
+  for (int i = 0; i < houses.length; i++) {
+    var currentHouseId = houses[i].id;
+
+    // get users with houseID
+    var names = await my_user.UserService().getUserNamesByHouseID(currentHouseId);
+    
+    print(names);
+
+    // concatenate appropriately
+    var formattedName = formatHouseName(names);
+
+    // add to list
+    list.add((formattedName, houses[i].id));
+  }
+  list.add(("I don't live with any of these people.", "0"));
+
+  print(list);
+
+  return list;
+}
+
 
   final List<Color> _colors = [
     CupertinoColors.systemPink, 
@@ -85,6 +140,8 @@ class _StartAvatarPageState extends State<StartAvatarPage> {
       _selectedColor = color;
     });
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -128,6 +185,7 @@ class _StartAvatarPageState extends State<StartAvatarPage> {
     );
   }
 
+
   Widget getPageFunctionality() {
 
     // Do you live with anyone already connected, screen (doesn't appear for people who are hosting)
@@ -144,51 +202,70 @@ class _StartAvatarPageState extends State<StartAvatarPage> {
 
           Container(
             height: 286,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: _houses.map((house) {
-                bool isSelected = _selectedHouse == house;
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: GestureDetector(
-                    onTap: () => _selectHouse(house),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(5.5),
-                        border: Border.all(
-                          color: Colors.grey, // Original inner border
-                          width: 1,
-                        ),
-                        boxShadow: [
-                          if (isSelected)
-                            BoxShadow(
-                              color: Colors.blue.withOpacity(0.8), // Outer border color
-                              spreadRadius: 2, 
-                              blurRadius: 0.2,
+            child: FutureBuilder<List<(String,String)>>(
+              future: _getHouses(), // Fetch the houses
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  // Display a loading indicator while waiting for the data
+                  return Center(child: SizedBox(child: CircularProgressIndicator(color: CupertinoColors.systemGrey2, strokeWidth: 2.5), width: 15,height: 15,),);
+                } else if (snapshot.hasError) {
+                  // Handle any errors that might occur
+                  return Center(child: Text('Error loading houses'));
+                } else if (snapshot.hasData) {
+                  // Use the data (houses) once it's available
+                  List<(String,String)> houses = snapshot.data!;
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: houses.map((house) {
+                      bool isSelected = _selectedHouse == house.$2;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: GestureDetector(
+                          onTap: () => _selectHouse(house.$2),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(5.5),
+                              border: Border.all(
+                                color: Colors.grey, // Original inner border
+                                width: 1,
+                              ),
+                              boxShadow: [
+                                if (isSelected)
+                                  BoxShadow(
+                                    color: Colors.blue.withOpacity(0.8), // Outer border color
+                                    spreadRadius: 2,
+                                    blurRadius: 0.2,
+                                  ),
+                              ],
                             ),
-                        ],
-                      ),
-                      child: SizedBox(
-                        width: double.infinity,
-                        height: 36,
-                        child: Center(
-                          child: Text(
-                            house,
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
+                            child: SizedBox(
+                              width: double.infinity,
+                              height: 36,
+                              child: Center(
+                                child: Text(
+                                  house.$1,
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
+                      );
+                    }).toList(),
+                  );
+                } else {
+                  // Handle the case when no data is returned
+                  return Center(child: Text('No houses available'));
+                }
+              },
             ),
           ),
+
 
           const SizedBox(height: 32),
           Button(
@@ -237,6 +314,7 @@ class _StartAvatarPageState extends State<StartAvatarPage> {
                 showError("Name cannot be empty.");
               // if not, try to login to neighbourhood
               } else {
+                _name = nameController.text;
                 clearControllers();
                 clearError();
                 setState(() {
@@ -324,15 +402,54 @@ class _StartAvatarPageState extends State<StartAvatarPage> {
           const SizedBox(height: 34),
           Button(
             text: 'Next',
+            isLoading: _isLoading,
             onPressed: () async {
+              activateLoading();
 
               if (_selectedColor == CupertinoColors.systemGrey) {
                 showError('Please select a colour.');
               } else {
                 clearError(); // TODO: big save here
-                setState(() {
-                  _screen = 4;
-                });
+
+                // get user ID from auth service                
+                var uid = auth.FirebaseAuth.instance.currentUser?.uid;
+
+                // use that user ID to get the user from firestore
+                if (uid != null) {
+                  var user = await my_user.UserService().getUser(uid);
+                  if (user != null) {
+
+                    // Logic to create a new house if the user doesn't select an exisitng house
+                    if ((_selectedHouse == "0") | (_selectedHouse == "")) {
+                      print('making a new house');
+                      print(user.name);
+                      print('');
+                      var temp = await my_house.HouseService().createHouse(user.neighID);
+                      if (temp != null) {
+                        print('assinging user new house ID');
+                        _selectedHouse = temp;
+                      };
+                    }
+
+                    // Saving details to user
+                    user.houseID = _selectedHouse;
+                    user.name = _name;
+                    user.avatar = _avatars[_currentAvatarIndex];
+                    user.avatarColor = _selectedColor;
+                    bool result = await my_user.UserService().updateUser(user);
+
+                    // If the save is successful move to the final screen.
+                    if (result == true) {
+                      deActivateLoading();
+                      setState(() {
+                        _screen = 4;
+                      });
+                    }
+                    
+                  }
+                }
+                deActivateLoading();
+
               }
             },
           ),
@@ -441,20 +558,6 @@ class _StartAvatarPageState extends State<StartAvatarPage> {
     nameController.text = "";
   }
 
-  /*
-  Future<void> createUserProfile(String email, String name, String avatarRef, Color avatarCol, String houseId) async {
-    User? user = _auth.currentUser;
-    if (user != null) {
-      await _firestore.collection('users').doc(user.uid).set({
-        'email': email,
-        'name': name,
-        'avatarRef': avatarRef,
-        'avatarCol' : avatarCol,
-        'houseId' : houseId,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
-    }
-  }*/
 
   Widget getSmallText({required String message, int widgetNumber = 0}) {
     return Column(

@@ -59,32 +59,31 @@ class _ButtonState extends State<Button> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (widget.isLoading) 
-                const SizedBox(
+              widget.isLoading 
+              ? const SizedBox(
                   child: Center(
                     child: CircularProgressIndicator(color: CupertinoColors.systemGrey2, strokeWidth: 2.5),
                   ),
                   width: 15,
                   height: 15,
                 )
-              else
-                if (widget.icon != null) // Check if icon is provided
-                  Padding(
+              : (widget.icon != null)
+                ? Padding(
                     padding: const EdgeInsets.only(right: 4.0), // Add spacing between text and icon
                     child: SizedBox(
                       height: 12,
                       width: 12,
                       child: widget.icon,
                     ),
-                  ),
-                  Text(
+                  )
+                : Text(
                     widget.text, 
                     style: TextStyle(
                       color: Colors.black,
                       fontSize: 14, 
                       fontWeight: FontWeight.w600,
                     ),
-                  ),
+                  )
             ],
           ),
         ),

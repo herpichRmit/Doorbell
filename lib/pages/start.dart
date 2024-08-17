@@ -1,9 +1,11 @@
 import 'dart:ffi';
 
 import 'package:doorbell/pages/home.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:doorbell/pages/startAvatar.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
+import 'package:doorbell/model/user.dart' as my_user;
 import 'package:flutter/material.dart';
-import '../components/button.dart'; // Import your custom button component
+import '../components/button.dart';
 import 'package:flutter/cupertino.dart';
 import '../components/splashSmallText.dart';
 import '../components/textField.dart';
@@ -37,9 +39,6 @@ class _StartPageState extends State<StartPage> {
   String _email = "";
   bool _isLoading = false;
 
-  // username
-  // password
-  // password again
 
   @override
   Widget build(BuildContext context) {
@@ -196,16 +195,18 @@ class _StartPageState extends State<StartPage> {
                 deActivateLoading();
               // if not, save email to a temp variable, clear the controller and go to next screen
               } else {
-                //bool result = await checkUserExists(loginEmailController.text); TODO: add this function
+                bool result = await my_user.UserService().userExists(loginEmailController.text);
                 deActivateLoading();
-                //if (result == true) {
+                if (result == true) {
                   _email = loginEmailController.text;
                   clearControllers();
                   clearError();
                   setState(() {
                     _nextLogin = true;
                   });
-                //}
+                } else {
+                  showError("Email doesn't exist, please try again.");
+                }
               }
             },
           ),
@@ -239,10 +240,37 @@ class _StartPageState extends State<StartPage> {
                     clearControllers();
                     clearError();
                     // If login is successful, navigate to the next page
-                    // TODO: do checks here on user to make sure user has neighbourhood and house already
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) => StartNeighbourhoodPage()),
-                    );
+
+                    // Get user details
+                    var uid = auth.FirebaseAuth.instance.currentUser?.uid;
+                    if (uid != null) {
+                      var user = await my_user.UserService().getUser(uid);
+
+                      if (user != null) {
+                        if (user.neighID == "") { // If user doesn't have a neighbourhoodID send them to the startNeighbourhood page
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(builder: (context) => StartNeighbourhoodPage()),
+                          );
+                        } else if (user.houseID == "") { // If user has neighID but doesn't have a houseID send them to the startAvatar page
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(builder: (context) => StartAvatarPage(inputScreen: 1,)),
+                          );
+                        } else if ((user.name == "") | (user.avatar == "")) { // If user has houseID but doesn't have a name or avatar send them to the startAvatar page
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(builder: (context) => StartAvatarPage()),
+                          );
+                        } else { // Send them to the home page
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(builder: (context) => HomePage()),
+                          );
+                        }
+                        
+                      } else { // Incase a user hasn't been created in firestore yet
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(builder: (context) => StartNeighbourhoodPage()),
+                        );
+                      }
+                    }
                   }
                 }
                 },
@@ -310,34 +338,19 @@ class _StartPageState extends State<StartPage> {
     return emailRegex.hasMatch(email);
   }
 
-  checkUserExists(String email) async { // TODO: Pending integration with FirebaseFirestore
-    /*
-    try {
-    // if the size of value is greater then 0 then that doc exist. 
-      await FirebaseFirestore.instance
-          .collection('Users')
-          .where('email', isEqualTo: email)
-          .get()
-          .then((value) => value.size > 0 ? true : false);
-    } catch (e) {
-      debugPrint(e.toString());
-     
-    }
-  */
 
-  }
 
   // This function calls FirebaseAuth to authenticate the user
   login(String email, String password) async {
     try {
-      final credential = await FirebaseAuth.instance
+      final credential = await auth.FirebaseAuth.instance
       .signInWithEmailAndPassword(
         email: email, 
         password: password
       );
       return true;
 
-    } on FirebaseAuthException catch (e) {
+    } on auth.FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         showError('No user found for that email.');
         return false;
@@ -357,11 +370,30 @@ class _StartPageState extends State<StartPage> {
   // This function calls FirebaseAuth to create a new user
   signup(String email, String password) async {
     try {
-      final credential = await FirebaseAuth.instance
+      final credential = await auth.FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
+
+      // Creating a second user entity in cloud_firestore, to store user details that are extraneous to authentication
+      var user = my_user.User(
+        id: credential.user!.uid, 
+        email: email, 
+        name: '', 
+        avatar: '', 
+        avatarColor: CupertinoColors.systemGrey, 
+        houseID: "", 
+        neighID: "", 
+        lastOnline: DateTime.now()
+      );
+      bool result = await my_user.UserService().setUser(user);
+
+      if (result) {
+        print('Success - Created new user in firestore');
+      } else {
+        print('Failure - Something went wrong creating user in firestore');
+      }
       return true;
 
-    } on FirebaseAuthException catch (e) {
+    } on auth.FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         showError('The password provided is too weak.');
         return false;
