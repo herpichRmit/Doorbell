@@ -68,14 +68,26 @@ class _ButtonState extends State<Button> {
                   height: 15,
                 )
               : (widget.icon != null)
-                ? Padding(
-                    padding: const EdgeInsets.only(right: 4.0), // Add spacing between text and icon
-                    child: SizedBox(
-                      height: 12,
-                      width: 12,
-                      child: widget.icon,
+                ? Row(
+                  children: [ 
+                    Padding(
+                      padding: const EdgeInsets.only(right: 4.0), // Add spacing between text and icon
+                      child: SizedBox(
+                        height: 12,
+                        width: 12,
+                        child: widget.icon,
+                      ),
+                    ), 
+                    Text(
+                      widget.text, 
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 14, 
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  )
+                    ],
+                )
                 : Text(
                     widget.text, 
                     style: TextStyle(

@@ -12,6 +12,7 @@ class User {
   String houseID;
   String neighID;
   DateTime lastOnline;
+  final List<String> clickedPostIds; 
 
   User({
     required this.id,
@@ -22,6 +23,7 @@ class User {
     required this.houseID,
     required this.neighID,
     required this.lastOnline,
+    this.clickedPostIds = const [], 
   });
 
   // Convert a User into a Map
@@ -31,10 +33,11 @@ class User {
       'email': email,
       'name': name,
       'avatar': avatar,
-      'avatarColor': avatarColor.value, // Convert Color to integer
+      'avatarColor': avatarColor.value, 
       'houseID': houseID,
       'neighID': neighID,
       'lastOnline': lastOnline,
+      'clickedPostIds': clickedPostIds,
     };
   }
 
@@ -49,12 +52,10 @@ class User {
       houseID: map['houseID'] ?? '',
       neighID: map['neighID'] ?? '',
       lastOnline: (map['lastOnline'] as Timestamp).toDate(), // Convert Timestamp to DateTime
+      clickedPostIds: List<String>.from(map['clickedPostIds'] ?? []),
     );
   }
 }
-
-
-
 
 class UserService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -118,6 +119,26 @@ class UserService {
       return names;
     } catch (e) {
       print('Error getting usernames by houseID: $e');
+      return [];
+    }
+  }
+
+  // Function to get all users by houseID
+  Future<List<User>> getUsersByHouseID(String houseID) async {
+    try {
+      // Query the users collection where houseID matches the provided value
+      QuerySnapshot querySnapshot = await _userCollection
+          .where('houseID', isEqualTo: houseID)
+          .get();
+
+      // Map the query results to a list of User objects
+      List<User> users = querySnapshot.docs.map((doc) {
+        return User.fromMap(doc.data() as Map<String, dynamic>);
+      }).toList();
+
+      return users;
+    } catch (e) {
+      print('Error getting users by houseID: $e');
       return [];
     }
   }

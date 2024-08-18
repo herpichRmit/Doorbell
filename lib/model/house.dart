@@ -3,10 +3,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class House {
   final String id;
   final String neighID;
+  final List<String> pokedUserIds; // List of user IDs who have poked this house
 
   House({
     required this.id,
     required this.neighID,
+    this.pokedUserIds = const [],
   });
 
   // Convert a House into a Map
@@ -14,6 +16,7 @@ class House {
     return {
       'id': id,
       'neighID': neighID,
+      'pokedUserIds': pokedUserIds, // Add pokedUserIds to the map
     };
   }
 
@@ -22,17 +25,70 @@ class House {
     return House(
       id: map['id'] ?? '',
       neighID: map['neighID'] ?? '',
+      pokedUserIds: List<String>.from(map['pokedUserIds'] ?? []), // Initialize pokedUserIds
     );
   }
 }
 
 
+
 class HouseService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Collection reference
-  CollectionReference get _houseCollection =>
-      _firestore.collection('houses');
+  CollectionReference get _houseCollection => _firestore.collection('houses');
+
+  // Method to add a user to the pokedUserIds list
+  Future<void> addPokedUser(String houseId, String userId) async {
+    try {
+      DocumentReference houseDoc = _houseCollection.doc(houseId);
+      await houseDoc.update({
+        'pokedUserIds': FieldValue.arrayUnion([userId]),
+      });
+    } catch (e) {
+      print('Error adding poked user: $e');
+    }
+  }
+
+  // Method to remove a user from the pokedUserIds list
+  Future<void> removePokedUser(String houseId, String userId) async {
+    try {
+      DocumentReference houseDoc = _houseCollection.doc(houseId);
+      await houseDoc.update({
+        'pokedUserIds': FieldValue.arrayRemove([userId]),
+      });
+    } catch (e) {
+      print('Error removing poked user: $e');
+    }
+  }
+  
+  // Method to clear the pokedUserIds list
+  Future<void> clearPokedUsers(String houseId) async {
+    try {
+      DocumentReference houseDoc = _houseCollection.doc(houseId);
+      await houseDoc.update({
+        'pokedUserIds': [], // Set the pokedUserIds list to an empty list
+      });
+    } catch (e) {
+      print('Error clearing poked users: $e');
+    }
+  }
+
+  // Method to get the last poked user ID from the list
+  Future<String?> getLastPokedUserId(String houseId) async {
+    try {
+      DocumentSnapshot doc = await _houseCollection.doc(houseId).get();
+      if (doc.exists) {
+        List<String> pokedUserIds = List<String>.from(doc['pokedUserIds'] ?? []);
+        if (pokedUserIds.isNotEmpty) {
+          return pokedUserIds.last; // Return the last entry in the list
+        }
+      }
+      return null;
+    } catch (e) {
+      print('Error getting last poked user ID: $e');
+      return null;
+    }
+  }
 
   // Create or Update House
   Future<bool> setHouse(House house) async {

@@ -1,10 +1,13 @@
 import 'dart:ffi';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doorbell/components/avatar.dart';
+import 'package:doorbell/model/post.dart';
 import 'package:doorbell/pages/start.dart';
 import 'package:doorbell/pages/home.dart';
 import 'package:doorbell/model/user.dart' as my_user;
 import 'package:doorbell/model/neigh.dart' as my_neigh;
 import 'package:doorbell/model/house.dart' as my_house;
+import 'package:doorbell/model/post.dart' as my_post;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../components/button.dart';
@@ -27,10 +30,10 @@ class DebugPage extends StatefulWidget {
 class _DebugPageState extends State<DebugPage> {
 
   // Define this stream before the build statement
-  //final Stream<QuerySnapshot> collectionStream = FirebaseFirestore.instance
-  //  .collection('posts') // Choose which collection we want to read
-  //  .orderBy("date", descending: true) // OPTIONAL: Set an order
-  //  .snapshots(); // Get notified of any changes to the collection
+  final Stream<QuerySnapshot> collectionStream = FirebaseFirestore.instance
+    .collection('posts')
+    .orderBy("timestamp", descending: true)
+    .snapshots();
 
   @override
   Widget build(BuildContext context) {
@@ -51,13 +54,66 @@ class _DebugPageState extends State<DebugPage> {
                 onPressed: () {
                   
                   Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => StartPage())
+                    MaterialPageRoute(builder: (context) => StartPage()),
                   );
                 },
               ),
               const SizedBox(height: 8),
               Button(
-                text: 'check user exists',
+                text: 'create post', // TODO
+                onPressed: () async {
+                  Post post = Post(
+                    userId: "VUHsjbEUo4RuI2bsSkOXeEkvaQA3", 
+                    userName: 'test',
+                    avatarPath: 'assets/images/avatars/avatar1.png',
+                    avatarColor:CupertinoColors.systemBlue,
+                    title: "Test post", 
+                    description: "test post test post test post test post", 
+                    images: [""], 
+                    timestamp: DateTime.now(), 
+                  );
+                  bool result = await my_post.PostService().createPost(post);
+
+                  if (result) {
+                    print('Success');
+                  } else {
+                    print('Failure');
+                  }
+
+                },
+              ),
+              Button(
+                text: 'update post', // TODO
+                onPressed: () async {
+                  var post = await my_post.PostService().getPost("C38zdFEnDlThYrB0T1BQ");
+                  if (post != null) {
+                    post.title = 'edited';
+                    post.description = 'testsvdfds';
+                    bool result = await my_post.PostService().updatePost(post);
+                    if (result) {
+                      print('Success');
+                    } else {
+                      print('Failure');
+                    }
+                  }
+
+                },
+              ),
+              Button(
+                text: 'delete post', // TODO
+                onPressed: () async {
+                  /*bool result = await my_user.UserService().userExists('ethanherpich@gmail.com');
+
+                  if (result) {
+                    print('Success');
+                  } else {
+                    print('Failure');
+                  }
+                  */
+                },
+              ),
+              Button(
+                text: 'read posts by houesID', // TODO
                 onPressed: () async {
                   bool result = await my_user.UserService().userExists('ethanherpich@gmail.com');
 
@@ -69,119 +125,101 @@ class _DebugPageState extends State<DebugPage> {
 
                 },
               ),
-              const SizedBox(height: 32),
               Button(
-                text: 'create user in firestore (first with email)',
+                text: 'get all new posts (has user seen it)', // TODO
                 onPressed: () async {
-                  var user = my_user.User(id: "1234", email: 'ethanherpich@gmail.com', name: 'Ethan', avatar: 'assets/images/avatars/avatar1', avatarColor: CupertinoColors.systemPink, houseID: "house1", neighID: "neigh1", lastOnline: DateTime.now());
-                  bool result = await my_user.UserService().setUser(user);
+                  bool result = await my_user.UserService().userExists('ethanherpich@gmail.com');
 
                   if (result) {
                     print('Success');
                   } else {
                     print('Failure');
                   }
+
                 },
               ),
-              const SizedBox(height: 32),
               Button(
-                text: 'check neighbourhoodId exists',
+                text: 'get all new posts (has user seen it)', // TODO
                 onPressed: () async {
-                  bool result = await my_neigh.NeighService().doesNeighExist("0001");
+                  bool result = await my_user.UserService().userExists('ethanherpich@gmail.com');
 
                   if (result) {
                     print('Success');
                   } else {
                     print('Failure');
                   }
-                },
-              ),
-              Button(
-                text: 'Login neigh: check neighbourhoodId matches password',
-                onPressed: () async {
-                  bool result = await my_neigh.NeighService().validateNeighCredentials("0001", "Badger01");
-                  if (result) {
-                    print('Success');
-                  } else {
-                    print('Failure');
-                  }
-                  
-                },
-              ),
-              Button(
-                text: 'Sign up neigh: create new neigh, generate ID and save password',
-                onPressed: () async {
-                  String? result = await my_neigh.NeighService().createNeigh("Badger01");
-                  if (result != null) {
-                    print('Success');
-                  } else {
-                    print('Failure');
-                  }
-                },
-              ),
-              const SizedBox(height: 32),
-              Button(
-                text: 'update user',
-                onPressed: () async {
-                  var user = my_user.User(id: "1234", email: 'ethanherpich@gmail.com', name: 'Ethan', avatar: 'assets/images/avatars/avatar1', avatarColor: CupertinoColors.systemPink, houseID: "0001", neighID: "0001", lastOnline: DateTime.now());
-                  bool result = await my_user.UserService().updateUser(user);
-                  if (result) {
-                    print('Success');
-                  } else {
-                    print('Failure');
-                  }
-                  
-                },
-              ),
-              const SizedBox(height: 32),
-              Button(
-                text: 'create a house',
-                onPressed: () async {
-                  var house = my_house.House(id: "0001", neighID: "0001");
-                  bool result = await my_house.HouseService().setHouse(house);
-                  if (result) {
-                    print('Success');
-                  } else {
-                    print('Failure');
-                  }
-                },
-              ),
-              const SizedBox(height: 32),
-              Button(
-                text: 'get houses with certain neigh id',
-                onPressed: () {
-                  
-                },
-              ),
-              const SizedBox(height: 32),
-              Button(
-                text: 'get user with specific ID',
-                onPressed: () {
-                  
-                },
-              ),
-              const SizedBox(height: 32),
-              Button(
-                text: 'get all users and print ID',
-                onPressed: () async {
-                  List<my_user.User> result = await my_user.UserService().getAllUsers();
 
-                  for (var i = 0; i < result.length; i++) {
-                    print(result[i]);
-                  }
-                  
                 },
               ),
-              const SizedBox(height: 32),
-              Button(
-                text: 'Home',
-                onPressed: () async {
 
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => HomePage())
-                  );
+              Button(
+                text: 'Homepage', 
+                onPressed: () async {
+                  
+                  Navigator.of(context).pop();
+
                 },
               ),
+              
+              Expanded(
+                child: StreamBuilder<QuerySnapshot>(
+                  stream: collectionStream,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return Center(child: Text('Something went wrong'));
+                    }
+
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+
+                    final posts = snapshot.data?.docs ?? [];
+
+                    if (posts.isEmpty) {
+                      return Center(child: Text('No posts available'));
+                    }
+
+                    return ListView.builder(
+                      itemCount: posts.length,
+                      itemBuilder: (context, index) {
+                        var post = posts[index];
+                        return Card(
+                          margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
+                          child: Padding(
+                            padding: const EdgeInsets.all(15.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                //if (post['imageUrl'] != null)
+                                //  Image.network(post['imageUrl']),
+                                SizedBox(height: 10),
+                                Text(
+                                  post['title'],
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                SizedBox(height: 5),
+                                Text(post['description']),
+                                SizedBox(height: 10),
+                                Text(
+                                  post['timestamp'].toDate().toString(),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  }
+                ),
+              ),
+
               const Spacer(flex: 3),
               
             ],

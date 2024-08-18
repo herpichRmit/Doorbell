@@ -94,6 +94,8 @@ flutter:
     - assets/images/graphics/name_graphic.png
     - assets/images/graphics/start_graphic.png
     - assets/images/graphics/start-neigh_graphic.png
+    - assets/images/doorbell/doorbellRing-01.png
+    - assets/images/doorbell/doorbellRing-02.png
   
 
 flutter_launcher_icons:

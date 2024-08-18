@@ -1,3 +1,4 @@
+import 'package:doorbell/components/avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import '../model/post.dart';
@@ -26,7 +27,7 @@ class PostCard extends StatelessWidget {
             Positioned(
               left: 6,
               top: 16,
-              child: post.avatar), 
+              child: Avatar(color: post.avatarColor, imagePath: post.avatarPath, size: 44,), ), 
             Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -56,13 +57,13 @@ class PostCard extends StatelessWidget {
                             Container(
                               padding: EdgeInsets.symmetric(horizontal: 4.0),
                               decoration: BoxDecoration(
-                                color: post.avatar.color.withOpacity(0.2),
+                                color: post.avatarColor.withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(2),
                               ),
                               child: Text(
                                 "New",
                                 style: TextStyle(
-                                  color: post.avatar.color.withOpacity(0.7),
+                                  color: post.avatarColor.withOpacity(0.7),
                                   fontSize: 14.0,
                                   fontWeight: FontWeight.w500,
                                   letterSpacing: -0.4,

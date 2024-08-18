@@ -48,7 +48,7 @@ class _DoorbellPopupSheetState extends State<DoorbellPopupSheet> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [ 
                         Avatar(color: widget.avatarColor, imagePath: widget.avatarPath, size: 64,),
-                        SizedBox(width: 8, height: 52),
+                        SizedBox(height: 52),
                         Container(
                           height: 64,
                           child: Column(
