@@ -11,7 +11,7 @@ class HouseButton extends StatefulWidget {
     Key? key,
     required this.imagePath,
     required this.onPressed,
-    this.height = 200.0,
+    this.height = 180.0,
     required this.avatars,
   }) : super(key: key);
 
