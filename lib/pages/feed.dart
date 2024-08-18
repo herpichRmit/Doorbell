@@ -108,6 +108,13 @@ class _FeedPageState extends State<FeedPage> {
     }
   }
 
+  Future<bool> _hasUserClickedPost(String postId) async {
+    var userAuth = FirebaseAuth.instance.currentUser;
+    var result = await my_user.UserService().hasUserClickedPost(userAuth!.uid, postId);
+    print(result);
+    return result;
+  }
+
   void activateLoading() {
     setState(() {
       _isLoading = true;
@@ -237,17 +244,31 @@ class _FeedPageState extends State<FeedPage> {
                           timestamp: (postSnapshot['timestamp'] as Timestamp).toDate(),
                         );
 
-                        return Column(
-                          children: [
-                            SizedBox(height: 8,),
-                            PostCard(
-                              post: post,
-                              onPressed: () {
-                                onPostClicked(postSnapshot.id);
-                                _showPostPopupSheet(context, post: post,);
-                              },
-                            ),
-                          ],
+                        return FutureBuilder<bool>(
+                          future: _hasUserClickedPost(postSnapshot.id), // Call the async method
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              // Return a loading indicator while waiting
+                              return CircularProgressIndicator();
+                            } else if (snapshot.hasError) {
+                              // Handle any errors
+                              return Text('Error: ${snapshot.error}');
+                            } else if (snapshot.hasData) {
+                              // Pass the result to PostCard
+                              bool hasClicked = snapshot.data!;
+                              return PostCard(
+                                post: post,
+                                hasClicked: hasClicked,
+                                onPressed: () {
+                                  onPostClicked(postSnapshot.id);
+                                  _showPostPopupSheet(context, post: post,);
+                                },
+                              );
+                            } else {
+                              // Handle case where there's no data
+                              return Text('No data');
+                            }
+                          },
                         );
                       },
                     );

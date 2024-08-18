@@ -195,5 +195,27 @@ class UserService {
       return false;
     }
   }
+
+  // Function to check if a postID is in the clickedPostIds list for a specific user
+  Future<bool> hasUserClickedPost(String userId, String postId) async {
+    try {
+      // Fetch the user document
+      DocumentSnapshot doc = await _userCollection.doc(userId).get();
+
+      if (doc.exists && doc.data() != null) {
+        // Convert the document data to a User object
+        User user = User.fromMap(doc.data() as Map<String, dynamic>);
+        
+        // Check if the postId exists in the clickedPostIds list
+        return user.clickedPostIds.contains(postId);
+      } else {
+        print('User document with ID $userId not found.');
+        return false;
+      }
+    } catch (e) {
+      print('Error checking clickedPostIds: $e');
+      return false;
+    }
+  }
   
 }

@@ -5,12 +5,14 @@ import '../model/post.dart';
 
 class PostCard extends StatelessWidget {
   final Post post;
+  final bool hasClicked;
   final VoidCallback onPressed;
 
   const PostCard({
     Key? key, 
     required this.post,
     required this.onPressed,
+    required this.hasClicked,
     }) : super(key: key);
 
   @override
@@ -54,22 +56,23 @@ class PostCard extends StatelessWidget {
                                 ),
                               ),
                             ), // Add spacing between title and "new"
-                            Container(
-                              padding: EdgeInsets.symmetric(horizontal: 4.0),
-                              decoration: BoxDecoration(
-                                color: post.avatarColor.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(2),
-                              ),
-                              child: Text(
-                                "New",
-                                style: TextStyle(
-                                  color: post.avatarColor.withOpacity(0.7),
-                                  fontSize: 14.0,
-                                  fontWeight: FontWeight.w500,
-                                  letterSpacing: -0.4,
+                            if (hasClicked == false)
+                              Container(
+                                padding: EdgeInsets.symmetric(horizontal: 4.0),
+                                decoration: BoxDecoration(
+                                  color: post.avatarColor.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                                child: Text(
+                                  "New",
+                                  style: TextStyle(
+                                    color: post.avatarColor.withOpacity(0.7),
+                                    fontSize: 14.0,
+                                    fontWeight: FontWeight.w500,
+                                    letterSpacing: -0.4,
+                                  ),
                                 ),
                               ),
-                            ),
                           ],
                         ),
                         Row(
