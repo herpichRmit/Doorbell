@@ -223,7 +223,7 @@ class _FeedPageState extends State<FeedPage> {
                   }
                 },
               ),
-              SizedBox(height: 8),
+              SizedBox(height: 12),
               Expanded(
                 child: StreamBuilder<QuerySnapshot>(
                   stream: FirebaseFirestore.instance
@@ -323,13 +323,18 @@ class _FeedPageState extends State<FeedPage> {
                             } else if (snapshot.hasData) {
                               // Pass the result to PostCard
                               bool hasClicked = snapshot.data!;
-                              return PostCard(
-                                post: post,
-                                hasClicked: hasClicked,
-                                onPressed: () {
-                                  onPostClicked(postSnapshot.id);
-                                  _showPostPopupSheet(context, post: post,);
-                                },
+                              return Column(
+                                children: [
+                                  PostCard(
+                                    post: post,
+                                    hasClicked: hasClicked,
+                                    onPressed: () {
+                                      onPostClicked(postSnapshot.id);
+                                      _showPostPopupSheet(context, post: post,);
+                                    },
+                                  ),
+                                  SizedBox(height: 12,),
+                                ],
                               );
                             } else {
                               // Handle case where there's no data
