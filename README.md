@@ -1,8 +1,10 @@
-# VICHACK Project
+# Doorbell - VICHACK Project
+
+![start_graphic](https://github.com/user-attachments/assets/5854b2f1-76c3-4158-b17f-568fd54fe613)
 
 ## Introduction
 
-Welcome to the VICHACK project repository! This Flutter application is designed to address the mobile development stream with the problem statement "bringing people together." Our app leverages Firebase to create a dynamic and engaging social platform where users can connect, share, and interact with their communities. Whether you're looking to join a neighborhood, catch up with friends, or engage with local events, our app provides an intuitive and seamless experience tailored to fostering connections and building relationships.
+Welcome to the project repository for Doorbell, our VICHACK 2024 submission! This Flutter application is designed to address the mobile development stream with the problem statement "bringing people together." Our app leverages Firebase to create a dynamic and engaging social platform where users can connect, share, and interact with their communities. Whether you're looking to join a neighborhood, catch up with friends, or engage with local events, our app provides an intuitive and seamless experience tailored to fostering connections and building relationships.
 
 ## Project Overview
 
@@ -37,6 +39,7 @@ To get started with this project, follow these steps:
     flutter pub get
 
 3. **Set Up Firebase**
+
 - Go to the Firebase Console and create a new project.
 - Add the google-services.json (for Android) or GoogleService-Info.plist (for iOS) to your project.
 - Configure Firebase Authentication, Firestore, and other services as required by the project.
