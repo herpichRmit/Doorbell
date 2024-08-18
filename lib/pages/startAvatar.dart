@@ -99,8 +99,6 @@ class _StartAvatarPageState extends State<StartAvatarPage> {
 
     // get users with houseID
     var names = await my_user.UserService().getUserNamesByHouseID(currentHouseId);
-    
-    print(names);
 
     // concatenate appropriately
     var formattedName = formatHouseName(names);

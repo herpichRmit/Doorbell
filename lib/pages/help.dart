@@ -18,6 +18,10 @@ import 'package:doorbell/pages/help.dart';
 
 
 class HelpPage extends StatelessWidget {
+  final String neighId;
+
+  HelpPage({super.key, required this.neighId});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,7 +39,7 @@ class HelpPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Center(
-                  child: Text('Your Neightbourhood ID is:',                 
+                  child: Text('Your Neightbourhood ID is: ${neighId}',                 
                     style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,

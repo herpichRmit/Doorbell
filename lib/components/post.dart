@@ -86,8 +86,6 @@ class PostCard extends StatelessWidget {
                                 color: CupertinoColors.systemGrey,
                               ),
                             ),
-                            const SizedBox(width: 8), // Add spacing between time and icon
-                            const Icon(Icons.access_time, size: 16), // Example icon
                           ],
                         ),
                       ],

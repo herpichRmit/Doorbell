@@ -277,6 +277,7 @@ class _PostPopupSheetState extends State<PostPopupSheet> {
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
+                                    const SizedBox(width: 8),
                                     Text(
                                       '${widget.timestamp.hour}:${widget.timestamp.minute} ${widget.timestamp.hour >= 12 ? "PM" : "AM"}',
                                       style: TextStyle(
@@ -314,12 +315,12 @@ class _PostPopupSheetState extends State<PostPopupSheet> {
                                   ),
                                 ),
                           SizedBox(height: 32.0),
-                          if (_isEditing)
-                            Button(
-                              icon: Image.asset("assets/images/icons/plusfill.png"),
-                              text: 'Add Images',
-                              onPressed: _addImages,
-                            ),
+                          //if (_isEditing)
+                          //  Button(
+                          //    icon: Image.asset("assets/images/icons/plusfill.png"),
+                          //    text: 'Add Images',
+                          //    onPressed: _addImages,
+                          //  ),
                           if (widget.imageUrls.isNotEmpty)
                             SizedBox(
                               height: 100,

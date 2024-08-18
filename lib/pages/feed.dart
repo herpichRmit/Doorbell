@@ -132,6 +132,31 @@ class _FeedPageState extends State<FeedPage> {
     await HouseService().addPokedUser(widget.house.id, userAuth!.uid);
   }
 
+  String _formatFeedName(List<String> names) {
+    if (names.isEmpty) return ''; // Handle empty list case
+
+    if (names.length == 1) {
+      return "${names[0]}'s feed";
+    } else if (names.length == 2) {
+      return "${names[0]} and ${names[1]}'s feed";
+    } else {
+      // Join all names except the last two with a comma
+      String allButLastTwo = names.sublist(0, names.length - 2).join(', ');
+      // Get the last two names
+      String lastTwo = "${names[names.length - 2]} and ${names[names.length - 1]}";
+
+      return "$allButLastTwo, $lastTwo's feed";
+    }
+  }
+
+  Future<String> _getFeedName() async {
+    // get users with houseID
+    var names = await my_user.UserService().getUserNamesByHouseID(widget.house.id);
+    // concatenate appropriately
+    var formattedName = _formatFeedName(names);
+    return formattedName;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -162,27 +187,43 @@ class _FeedPageState extends State<FeedPage> {
                   ),
                   Image.asset(
                     widget.houseImg,
-                    height: 100,
+                    height: 150,
                   ),
                   SizedBox(height: 120, width: 44,)
                 ],
               ),
               SizedBox(height: 32,),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text(
-                    "Melissa and Darren's House",
-                    style: TextStyle(
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: -0.23,
-                      color: CupertinoColors.systemGrey,
-                    ),
-                  ),
-                ],
+              FutureBuilder<String>(
+                future: _getFeedName(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(
+                            child: CircularProgressIndicator(color: CupertinoColors.systemGrey2, strokeWidth: 2.5),
+                          );
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else if (snapshot.hasData) {
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          snapshot.data!,
+                          style: TextStyle(
+                            fontSize: 14.0,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: -0.23,
+                            color: CupertinoColors.systemGrey,
+                          ),
+                        ),
+                      ],
+                    );
+                  } else {
+                    return Container(); // Return an empty container if the user doesn't own the house
+                  }
+                },
               ),
+              SizedBox(height: 8),
               Expanded(
                 child: StreamBuilder<QuerySnapshot>(
                   stream: FirebaseFirestore.instance
@@ -211,20 +252,46 @@ class _FeedPageState extends State<FeedPage> {
                     }).toList();
 
                     if (filteredPosts.isEmpty) {
-                      return Center(
-                        child: Column(
-                          children: [
-                            Spacer(),
-                            SizedBox(
-                              height: 100,
-                              width: 100,
-                              child: Doorbell(imageUrl: "assets/images/doorbell/doorbellRing-01.png", pressedImageUrl: "assets/images/doorbell/doorbellRing-02.png", onPressed: _addDoorbellPoke),
-                            ),
-                            Center(child: Text('No posts available.')),
-                            Center(child: _isRung ? Text('Do you want to ring their doorbell?.') : Text('You rung their doorbell, wait for a response.')),
-                            Spacer(),
-                          ],
-                        ),
+                      // Use FutureBuilder to check if the user is in their house
+                    return FutureBuilder<bool>(
+                      future: _isUsersHouse(),
+                        builder: (context, futureSnapshot) {
+                          if (futureSnapshot.connectionState == ConnectionState.waiting) {
+                            return SizedBox(
+                              child: Center(
+                                child: CircularProgressIndicator(color: CupertinoColors.systemGrey2, strokeWidth: 2.5),
+                              ),
+                              width: 15,
+                              height: 15,
+                            );
+                          } else if (futureSnapshot.hasError) {
+                            return Text('Error: ${futureSnapshot.error}');
+                          } else if (futureSnapshot.hasData && !futureSnapshot.data!) {
+                            // User is not in their house, show the Doorbell button
+                            return Center(
+                              child: Column(
+                                children: [
+                                  Spacer(),
+                                  SizedBox(
+                                    height: 100,
+                                    width: 100,
+                                    child: Doorbell(
+                                      imageUrl: "assets/images/doorbell/doorbellRing-01.png",
+                                      pressedImageUrl: "assets/images/doorbell/doorbellRing-02.png",
+                                      onPressed: _addDoorbellPoke,
+                                    ),
+                                  ),
+                                  Center(child: Text('No posts available.')),
+                                  Center(child: _isRung ? Text('Do you want to ring their doorbell?') : Text('You rung their doorbell, wait for a response.')),
+                                  Spacer(),
+                                ],
+                              ),
+                            );
+                          } else {
+                            // User is in their house, show an empty container or some other widget
+                            return Center(child: Text("Your feed is empty. Feel free to post."));
+                          }
+                        },
                       );
                     }
 
@@ -364,4 +431,5 @@ class _FeedPageState extends State<FeedPage> {
       },
     );
   }
+
 }

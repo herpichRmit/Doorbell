@@ -37,6 +37,19 @@ class HouseService {
 
   CollectionReference get _houseCollection => _firestore.collection('houses');
 
+  // Stream to get real-time updates of the last poked user ID
+  Stream<String?> getLastPokedUserIdStream(String houseId) {
+    return _houseCollection.doc(houseId).snapshots().map((docSnapshot) {
+      if (docSnapshot.exists) {
+        List<String> pokedUserIds = List<String>.from(docSnapshot['pokedUserIds'] ?? []);
+        if (pokedUserIds.isNotEmpty) {
+          return pokedUserIds.last; // Return the last entry in the list
+        }
+      }
+      return null;
+    });
+  }
+
   // Method to add a user to the pokedUserIds list
   Future<void> addPokedUser(String houseId, String userId) async {
     try {

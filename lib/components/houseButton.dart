@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 class HouseButton extends StatefulWidget {
   final String imagePath;
   final VoidCallback onPressed;
-  final double width;
   final double height;
   final List<Avatar> avatars;
 
@@ -12,8 +11,7 @@ class HouseButton extends StatefulWidget {
     Key? key,
     required this.imagePath,
     required this.onPressed,
-    this.width = 210.0,
-    this.height = 155.0,
+    this.height = 150.0,
     required this.avatars,
   }) : super(key: key);
 
@@ -67,7 +65,6 @@ class _HouseButtonState extends State<HouseButton> with SingleTickerProviderStat
             scale: _animation,
             child: Image.asset(
               widget.imagePath,
-              width: widget.width,
               height: widget.height,
             ),
           ),

@@ -31,17 +31,16 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
   // Setup user var
   my_user.User _user = my_user.User(id: "id", email: "email", name: "name", avatar: "avatar", avatarColor: Colors.black, houseID: "houseID", neighID: "neighID", lastOnline: DateTime.now());
   late Future<List<House>> _futureHouses;
-  late Future<String?> _lastPokedUserId;
+  late Stream<my_user.User?> _lastPokedUserStream;
 
   @override
   void initState() {
     super.initState();
     _futureHouses = _getHouses(); // Initialize the future
-    _lastPokedUserId = _getLastPokedUserIdForUserHouse();
+    _lastPokedUserStream = _getLastPokedUserStream(); // Initialize the stream
   }
 
   // Get current user details
@@ -57,12 +56,14 @@ class _HomePageState extends State<HomePage> {
     return my_house.HouseService().getHousesByNeighID(_user.neighID);
   }
 
-  Future<String?> _getLastPokedUserIdForUserHouse() async {
-    _user = await _getUser(); 
-    return my_house.HouseService().getLastPokedUserId(_user.houseID);
+  // Create a stream that emits updates when the last poked user changes
+  Stream<my_user.User?> _getLastPokedUserStream() async* {
+    _user = await _getUser();
+    yield* my_house.HouseService().getLastPokedUserIdStream(_user.houseID).asyncMap((result) async {
+      return result == null ? null : await my_user.UserService().getUser(result);
+    });
   }
 
-  // pass in a house object into a feed, then they get their users from that house object
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,10 +74,9 @@ class _HomePageState extends State<HomePage> {
           child: Stack(
             children: [
               FutureBuilder<List<House>>(
-                future: _futureHouses, // The future that you want to resolve
+                future: _futureHouses,
                 builder: (BuildContext context, AsyncSnapshot<List<House>> snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    // While waiting for the future to resolve
                     return SizedBox(
                             child: Center(
                               child: CircularProgressIndicator(color: CupertinoColors.systemGrey2, strokeWidth: 2.5),
@@ -85,13 +85,10 @@ class _HomePageState extends State<HomePage> {
                             height: 15,
                           );
                   } else if (snapshot.hasError) {
-                    // If the future resolves with an error
                     return Center(child: Text('Error: ${snapshot.error}'));
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    // If the future resolves but with no data
                     return Center(child: Text('No houses found.'));
                   } else {
-                    // When the future resolves successfully
                     List<House> houses = snapshot.data!;
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -122,7 +119,7 @@ class _HomePageState extends State<HomePage> {
 
                         return Row(
                           children: [
-                            if (index % 2 != 0) Spacer(), // Spacer to the left of even-indexed buttons
+                            if (index % 2 != 0) Spacer(),
                             HouseButton(
                               imagePath: imagePath,
                               onPressed: () { 
@@ -132,10 +129,10 @@ class _HomePageState extends State<HomePage> {
                               },
                               avatars: [],
                             ),
-                            if (index % 2 == 0) Spacer(), // Spacer to the right of odd-indexed buttons
+                            if (index % 2 == 0) Spacer(),
                           ],
                         );
-                      }).toList(), // Convert the Iterable to a List
+                      }).toList(),
                     );
                   }
                 },
@@ -148,14 +145,15 @@ class _HomePageState extends State<HomePage> {
                       ElevatedButton(
                         child: Text('?',     
                           style: TextStyle(
-                          fontSize: 20, // Text size
-                          fontWeight: FontWeight.bold, // Bold text
-                          color: CupertinoColors.systemGrey6, 
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: CupertinoColors.systemGrey6,
                           )
                         ),
-                        onPressed: () {
+                        onPressed: () async {
+                          _user = await _getUser();
                           Navigator.of(context).push(
-                            MaterialPageRoute(builder: (context) => HelpPage())
+                            MaterialPageRoute(builder: (context) => HelpPage(neighId: _user.neighID))
                           );
                         },
                         style: ElevatedButton.styleFrom(
@@ -168,15 +166,13 @@ class _HomePageState extends State<HomePage> {
                       SizedBox(height: 12),
 
                       ElevatedButton(
-                        child: Text('Logout', //change to icon     
-                          style: TextStyle(
-                          fontSize: 20, // Text size
-                          fontWeight: FontWeight.bold, // Bold text
+                        child: Icon(
+                          Icons.logout,
                           color: CupertinoColors.systemGrey6, 
-                          )
+                          size: 28,
                         ),
                         onPressed: () {
-                          var userAuth = FirebaseAuth.instance.signOut();
+                          FirebaseAuth.instance.signOut();
                           Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => StartPage()), (Route route) => false);
                         },
                         style: ElevatedButton.styleFrom(
@@ -188,30 +184,32 @@ class _HomePageState extends State<HomePage> {
                   
                       SizedBox(height: 12),
                       
-                      // Only show if there is a last poked user ID
-                      FutureBuilder<String?>(
-                        future: _lastPokedUserId,
-                        builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
+                      StreamBuilder<my_user.User?>(
+                        stream: _lastPokedUserStream,
+                        builder: (BuildContext context, AsyncSnapshot<my_user.User?> snapshot) {
                           if (snapshot.connectionState == ConnectionState.waiting) {
-                            return SizedBox.shrink(); // Don't show anything while loading
+                            return SizedBox.shrink();
                           } else if (snapshot.hasData && snapshot.data != null) {
                             return ElevatedButton(
                               child: Text('!',     
                                 style: TextStyle(
-                                fontSize: 20, // Text size
-                                fontWeight: FontWeight.bold, // Bold text
-                                color:CupertinoColors.systemGrey6, 
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: CupertinoColors.systemGrey6,
                                 )
                               ),
-                              onPressed: () => _showDoorbellPopupSheet(context, isEditiable: true, isNew: true),
+                              onPressed: () {
+                                my_house.HouseService().clearPokedUsers(_user.houseID);
+                                _showDoorbellPopupSheet(context, color: snapshot.data!.avatarColor, path: snapshot.data!.avatar, name: snapshot.data!.name, );
+                              },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: CupertinoColors.systemGreen,
+                                backgroundColor: snapshot.data?.avatarColor,
                                 shape: CircleBorder(), 
                                 padding: EdgeInsets.all(12), 
                               )
                             );
                           } else {
-                            return SizedBox.shrink(); // Don't show anything if no poked users
+                            return SizedBox.shrink();
                           }
                         },
                       ),
@@ -225,18 +223,16 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-
-
-  void _showDoorbellPopupSheet(BuildContext context, {required bool isEditiable, required bool isNew}) {
+  void _showDoorbellPopupSheet(BuildContext context, {required Color color, required String path, required String name}) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
         return DoorbellPopupSheet(
-          name: 'Ethan',
-          avatarPath: 'assets/images/avatars/avatar1.png',
-          avatarColor: CupertinoColors.activeGreen,
+          name: name,
+          avatarPath: path,
+          avatarColor: color,
         );
       },
     );
