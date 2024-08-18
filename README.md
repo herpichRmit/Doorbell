@@ -5,6 +5,8 @@
 ## Introduction
 
 Welcome to the project repository for Doorbell, our VICHACK 2024 submission! This Flutter application is designed to address the mobile development stream with the problem statement "bringing people together." Our app leverages Firebase to create a dynamic and engaging social platform where users can connect, share, and interact with their communities. Whether you're looking to join a neighborhood, catch up with friends, or engage with local events, our app provides an intuitive and seamless experience tailored to fostering connections and building relationships.
+- Checkout our app introduction: https://youtu.be/yytqodtxduc
+- Checkout our run through: https://youtu.be/Zuf3dkFdcBg
 
 ## Project Overview
 
